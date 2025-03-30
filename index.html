@@ -1,94 +1,101 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8" />
-    <title>Babylon.js - Bouncing Ball</title>
-    <style>
-      html, body {
-        width: 100%;
-        height: 100%;
-        margin: 0;
-        overflow: hidden;
-      }
-      canvas {
-        width: 100%;
-        height: 100%;
-        touch-action: none;
-      }
-    </style>
-    <!-- Load Babylon.js and Cannon.js via CDN -->
-    <script src="https://cdn.babylonjs.com/babylon.js"></script>
-    <script src="https://cdn.babylonjs.com/cannon.js"></script>
-  </head>
-  <body>
-    <canvas id="renderCanvas"></canvas>
-    <script>
-      // Get the canvas element
-      const canvas = document.getElementById("renderCanvas");
-
-      // Create the Babylon engine
-      const engine = new BABYLON.Engine(canvas, true);
-
-      // Create the scene
-      const createScene = function () {
-        const scene = new BABYLON.Scene(engine);
-
-        // Enable physics using CannonJS
-        const gravity = new BABYLON.Vector3(0, -9.81, 0);
-        const physicsPlugin = new BABYLON.CannonJSPlugin();
-        scene.enablePhysics(gravity, physicsPlugin);
-
-        // Set up an ArcRotateCamera
-        const camera = new BABYLON.ArcRotateCamera("camera", Math.PI / 2, Math.PI / 4, 20, BABYLON.Vector3.Zero(), scene);
-        camera.attachControl(canvas, true);
-
-        // Create a Hemispheric light
-        const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(1, 1, 0), scene);
-
-        // Create a ground plane
-        const ground = BABYLON.MeshBuilder.CreateGround("ground", { width: 20, height: 20 }, scene);
-        const groundMat = new BABYLON.StandardMaterial("groundMat", scene);
-        groundMat.diffuseColor = new BABYLON.Color3(0.5, 0.5, 0.5);
-        ground.material = groundMat;
-        
-        // Add a physics impostor to the ground (static body)
-        ground.physicsImpostor = new BABYLON.PhysicsImpostor(
-          ground,
-          BABYLON.PhysicsImpostor.BoxImpostor,
-          { mass: 0, friction: 0.5, restitution: 0.7 },
-          scene
-        );
-
-        // Create a sphere (ball)
-        const sphere = BABYLON.MeshBuilder.CreateSphere("sphere", { diameter: 2, segments: 32 }, scene);
-        sphere.position = new BABYLON.Vector3(0, 10, 0);
-        const sphereMat = new BABYLON.StandardMaterial("sphereMat", scene);
-        sphereMat.diffuseColor = new BABYLON.Color3(1, 0, 0);
-        sphere.material = sphereMat;
-        
-        // Add a physics impostor to the sphere (dynamic body)
-        sphere.physicsImpostor = new BABYLON.PhysicsImpostor(
-          sphere,
-          BABYLON.PhysicsImpostor.SphereImpostor,
-          { mass: 1, friction: 0.2, restitution: 0.9 },
-          scene
-        );
-
-        return scene;
-      };
-
-      // Create the scene
-      const scene = createScene();
-
-      // Render loop
-      engine.runRenderLoop(function () {
-        scene.render();
-      });
-
-      // Resize the engine on window resize
-      window.addEventListener("resize", function () {
-        engine.resize();
-      });
-    </script>
-  </body>
+<head>
+  <meta charset="utf-8" />
+  <title>Physics Playground</title>
+  <link rel="stylesheet" href="https://cdn.babylonjs.com/babylon.gui.min.css" />
+  <link rel="stylesheet" href="style.css"/>
+  <!-- Load Babylon.js and Cannon.js -->
+  <script src="https://cdn.babylonjs.com/babylon.js"></script>
+  <script src="https://cdn.babylonjs.com/cannon.js"></script>
+  <script src="https://cdn.babylonjs.com/gui/babylon.gui.min.js"></script>
+  <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+</head>
+<body>
+  <div class="header">
+    <h1>Physics Playground</h1>
+    <p style="margin-top: 5px; font-size: 14px;">Click on objects in the toolbar to add them to the scene</p>
+  </div>
+  
+  <div class="toolbar">
+    <div class="toolbar-item" data-type="sphere" data-charge="neutral">
+      <div style="width:32px;height:32px;background-color:#f00;border-radius:50%;"></div>
+      <span>Sphere</span>
+    </div>
+    <div class="toolbar-item" data-type="cube" data-charge="neutral">
+      <div style="width:32px;height:32px;background-color:#00f;"></div>
+      <span>Cube</span>
+    </div>
+    <div class="toolbar-item" data-type="cylinder" data-charge="neutral">
+      <div style="width:32px;height:32px;background-color:#0f0;border-radius:5px;"></div>
+      <span>Cylinder</span>
+    </div>
+    <div class="toolbar-item" data-type="sphere" data-charge="positive">
+      <div style="width:32px;height:32px;background-color:#f00;border-radius:50%;position:relative;">
+        <span style="position:absolute;top:8px;left:12px;color:white;font-weight:bold;">+</span>
+      </div>
+      <span>Positive</span>
+    </div>
+    <div class="toolbar-item" data-type="sphere" data-charge="negative">
+      <div style="width:32px;height:32px;background-color:#00f;border-radius:50%;position:relative;">
+        <span style="position:absolute;top:8px;left:12px;color:white;font-weight:bold;">-</span>
+      </div>
+      <span>Negative</span>
+    </div>
+  </div>
+  
+  <div class="main-container">
+    <div class="control-panel">
+      <div class="control-group">
+        <div class="control-title">Physics Settings</div>
+        <div class="slider-container">
+          <div class="slider-label">Gravity</div>
+          <input type="range" min="0" max="30" value="9.81" step="0.1" id="gravitySlider" class="slider">
+          <div class="slider-value" id="gravityValue">9.81</div>
+        </div>
+        <div class="slider-container">
+          <div class="slider-label">E-Field Strength</div>
+          <input type="range" min="0" max="50" value="10" step="0.5" id="fieldStrengthSlider" class="slider">
+          <div class="slider-value" id="fieldStrengthValue">10</div>
+        </div>
+        <div class="slider-container">
+          <div class="slider-label">Restitution</div>
+          <input type="range" min="0" max="1" value="0.7" step="0.05" id="restitutionSlider" class="slider">
+          <div class="slider-value" id="restitutionValue">0.7</div>
+        </div>
+        <div class="slider-container">
+          <div class="slider-label">Friction</div>
+          <input type="range" min="0" max="1" value="0.2" step="0.05" id="frictionSlider" class="slider">
+          <div class="slider-value" id="frictionValue">0.2</div>
+        </div>
+      </div>
+      
+      <div class="control-group">
+        <div class="control-title">Environment</div>
+        <div class="slider-container">
+          <input type="checkbox" id="showFieldLines" checked>
+          <label for="showFieldLines">Show Field Lines</label>
+        </div>
+        <div class="slider-container">
+          <input type="checkbox" id="showForces" checked>
+          <label for="showForces">Show Forces</label>
+        </div>
+        <button id="resetScene" style="width:100%;padding:5px;margin-top:10px;">Reset Scene</button>
+      </div>
+      
+      <div class="control-group">
+        <div class="control-title">Selected Object</div>
+        <div id="selectedObjectProperties">No object selected</div>
+      </div>
+    </div>
+    
+    <div class="canvas-container">
+      <canvas id="renderCanvas"></canvas>
+    </div>
+  </div>
+  
+  <div id="debug" style="display: none;">Debug info will appear here</div>
+  
+  <script src="script.js"></script>
+</body>
 </html>
