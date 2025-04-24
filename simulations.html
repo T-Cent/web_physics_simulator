@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulations - PhysLab</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <h1>PhysLab</h1>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="simulations.html" class="active">Simulations</a></li>
+                <li><a href="about.html">About Us</a></li>
+                <li class="theme-toggle">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="theme-toggle-btn">
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span class="toggle-text">Dark Mode</span>
+                </li>
+            </ul>
+            <div class="burger">
+                <div class="line1"></div>
+                <div class="line2"></div>
+                <div class="line3"></div>
+            </div>
+        </nav>
+    </header>
+
+    <section class="sim-header">
+        <h1>Interactive Physics Simulations</h1>
+        <p>Experiment with physical phenomena through interactive simulations</p>
+    </section>
+
+    <div class="sim-content">
+        <nav class="sim-nav">
+            <ul>
+                <li><a href="#pendulum" class="active">Double Pendulum</a></li>
+                <li><a href="#electric">Electric Field</a></li>
+                <li><a href="#quantum">Quantum Wave</a></li>
+                <li><a href="#fluid">Fluid Dynamics</a></li>
+                <li><a href="#waves">Wave Interference</a></li>
+                <li><a href="#collision">Elastic Collisions</a></li>
+            </ul>
+        </nav>
+
+        <!-- Double Pendulum Simulation -->
+        <div id="pendulum" class="simulation-wrapper">
+            <div class="simulation-container">
+                <canvas id="pendulum-canvas" class="simulation-canvas"></canvas>
+                <div class="simulation-controls">
+                    <div class="button-group">
+                        <button id="pendulum-start" class="control-button">Start</button>
+                        <button id="pendulum-reset" class="control-button reset">Reset</button>
+                    </div>
+                </div>
+                <div class="simulation-info">
+                    <h3>About Double Pendulum Chaos</h3>
+                    <p>The double pendulum is a classic example of chaotic motion in physics. It consists of one pendulum attached to another, creating a system that is extremely sensitive to initial conditions.</p>
+                    <div class="equations">
+                        <p>The equations governing double pendulum motion are derived from Lagrangian mechanics and can't be solved analytically.</p>
+                        <p>This system demonstrates the "butterfly effect" - tiny changes in initial position lead to completely different trajectories over time.</p>
+                    </div>
+                    <p>Watch the pink trail to visualize the path of the second bob over time, demonstrating the unpredictable nature of chaotic systems.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Electric Field Simulation -->
+        <div id="electric" class="simulation-wrapper" style="display: none;">
+            <div class="simulation-container">
+                <canvas id="electric-canvas" class="simulation-canvas"></canvas>
+                <div class="simulation-controls">
+                    <div class="control-group">
+                        <button id="electric-add-positive" class="control-button">Add Positive Charge</button>
+                        <button id="electric-add-negative" class="control-button">Add Negative Charge</button>
+                    </div>
+                    <div class="button-group">
+                        <button id="electric-start" class="control-button">Start</button>
+                        <button id="electric-reset" class="control-button reset">Reset</button>
+                    </div>
+                </div>
+                <div class="simulation-info">
+                    <h3>About Electric Field Visualization</h3>
+                    <p>This simulation demonstrates the electric field created by point charges in space. The field lines show the direction a positive test charge would move if placed in the field.</p>
+                    <div class="equations">
+                        <p>Coulomb's Law: F = k(q₁q₂/r²)</p>
+                        <p>Electric Field: E = F/q = k(q/r²)</p>
+                    </div>
+                    <p>Drag charges to reposition them. Double-click on a charge to remove it. Positive charges (red) create field lines that emanate outward, while negative charges (blue) have field lines pointing inward.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quantum Wave Simulation -->
+        <div id="quantum" class="simulation-wrapper" style="display: none;">
+            <div class="simulation-container">
+                <canvas id="quantum-canvas" class="simulation-canvas"></canvas>
+                <div class="simulation-controls">
+                    <div class="control-group">
+                        <label for="quantum-potential">Potential Type</label>
+                        <select id="quantum-potential">
+                            <option value="barrier">Potential Barrier</option>
+                            <option value="well">Potential Well</option>
+                            <option value="harmonic">Harmonic Oscillator</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label for="quantum-wave">Initial Wave Packet</label>
+                        <select id="quantum-wave">
+                            <option value="gaussian">Gaussian Wave Packet</option>
+                            <option value="plane">Plane Wave</option>
+                        </select>
+                    </div>
+                    <div class="button-group">
+                        <button id="quantum-start" class="control-button">Start</button>
+                        <button id="quantum-reset" class="control-button reset">Reset</button>
+                    </div>
+                </div>
+                <div class="simulation-info">
+                    <h3>About Quantum Wave Function</h3>
+                    <p>This simulation visualizes the time evolution of a quantum wave function in one dimension, demonstrating fundamental quantum mechanical principles.</p>
+                    <div class="equations">
+                        <p>Schrödinger Equation: iħ∂ψ/∂t = -ħ²/2m ∂²ψ/∂x² + V(x)ψ</p>
+                        <p>Probability Density: P(x) = |ψ(x)|²</p>
+                    </div>
+                    <p>The blue line represents the real part of the wave function, while the pink area below shows the probability density. Watch how the wave packet interacts with different potential energy configurations.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fluid Dynamics Simulation -->
+        <div id="fluid" class="simulation-wrapper" style="display: none;">
+            <div class="simulation-container">
+                <canvas id="fluid-canvas" class="simulation-canvas"></canvas>
+                <div class="simulation-controls">
+                    <div class="control-group">
+                        <label for="fluid-object">Object Shape</label>
+                        <select id="fluid-object">
+                            <option value="circle">Circle</option>
+                            <option value="airfoil">Airfoil</option>
+                            <option value="rectangle">Rectangle</option>
+                        </select>
+                    </div>
+                    <div class="button-group">
+                        <button id="fluid-start" class="control-button">Start</button>
+                        <button id="fluid-reset" class="control-button reset">Reset</button>
+                    </div>
+                </div>
+                <div class="simulation-info">
+                    <h3>About Fluid Dynamics</h3>
+                    <p>This simulation demonstrates fluid flow around obstacles, visualizing concepts like turbulence, vortex shedding, and Bernoulli's principle.</p>
+                    <div class="equations">
+                        <p>Navier-Stokes Equations (simplified): ∂v/∂t + (v·∇)v = -∇p/ρ + ν∇²v</p>
+                        <p>Bernoulli's Equation: p + ½ρv² + ρgh = constant</p>
+                    </div>
+                    <p>Move your mouse through the fluid to interact with the flow. Change the obstacle shape to see how different objects affect the fluid dynamics.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Wave Interference Simulation -->
+        <div id="waves" class="simulation-wrapper" style="display: none;">
+            <div class="simulation-container">
+                <canvas id="waves-canvas" class="simulation-canvas"></canvas>
+                <div class="simulation-controls">
+                    <div class="control-group">
+                        <label for="waves-frequency1">Source 1 Frequency</label>
+                        <input type="range" id="waves-frequency1" min="1" max="10" value="5">
+                        <div class="slider-values">
+                            <span>Low</span>
+                            <span>High</span>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label for="waves-frequency2">Source 2 Frequency</label>
+                        <input type="range" id="waves-frequency2" min="1" max="10" value="5">
+                        <div class="slider-values">
+                            <span>Low</span>
+                            <span>High</span>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label for="waves-amplitude">Amplitude</label>
+                        <input type="range" id="waves-amplitude" min="1" max="20" value="10">
+                        <div class="slider-values">
+                            <span>Small</span>
+                            <span>Large</span>
+                        </div>
+                    </div>
+                    <div class="button-group">
+                        <button id="waves-start" class="control-button">Start</button>
+                        <button id="waves-reset" class="control-button reset">Reset</button>
+                    </div>
+                </div>
+                <div class="simulation-info">
+                    <h3>About Wave Interference</h3>
+                    <p>When two or more waves meet, they interact through the principle of superposition, creating patterns of constructive and destructive interference.</p>
+                    <div class="equations">
+                        <p>Wave equation: y(x,t) = A sin(kx - ωt + φ)</p>
+                        <p>For superposition: y_total = y₁ + y₂</p>
+                    </div>
+                    <p>Adjust the frequency and amplitude of both sources to observe how the interference pattern changes.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Elastic Collisions Simulation -->
+        <div id="collision" class="simulation-wrapper" style="display: none;">
+            <div class="simulation-container">
+                <canvas id="collision-canvas" class="simulation-canvas"></canvas>
+                <div class="simulation-controls">
+                    <div class="control-group">
+                        <label for="collision-mass1">Mass 1</label>
+                        <input type="range" id="collision-mass1" min="1" max="10" value="5">
+                        <div class="slider-values">
+                            <span>Light</span>
+                            <span>Heavy</span>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label for="collision-mass2">Mass 2</label>
+                        <input type="range" id="collision-mass2" min="1" max="10" value="5">
+                        <div class="slider-values">
+                            <span>Light</span>
+                            <span>Heavy</span>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label for="collision-velocity">Initial Velocity</label>
+                        <input type="range" id="collision-velocity" min="1" max="10" value="5">
+                        <div class="slider-values">
+                            <span>Slow</span>
+                            <span>Fast</span>
+                        </div>
+                    </div>
+                    <div class="button-group">
+                        <button id="collision-start" class="control-button">Start</button>
+                        <button id="collision-reset" class="control-button reset">Reset</button>
+                    </div>
+                </div>
+                <div class="simulation-info">
+                    <h3>About Elastic Collisions</h3>
+                    <p>In an elastic collision, both momentum and kinetic energy are conserved. This simulation demonstrates how objects of different masses interact during collisions.</p>
+                    <div class="equations">
+                        <p>Conservation of Momentum: m₁v₁ + m₂v₂ = m₁v₁' + m₂v₂'</p>
+                        <p>Conservation of Kinetic Energy: ½m₁v₁² + ½m₂v₂² = ½m₁v₁'² + ½m₂v₂'²</p>
+                    </div>
+                    <p>Experiment with different masses and velocities to observe how they affect the outcome of collisions.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>PhysLab</h3>
+                <p>Interactive physics simulations for students, educators, and enthusiasts.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="simulations.html">Simulations</a></li>
+                    <li><a href="about.html">About Us</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Connect</h3>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-github"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 PhysLab. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script src="physics-particles.js"></script>
+    <script src="pendulum.js"></script>
+    <script src="electric-field.js"></script>
+    <script src="quantum.js"></script>
+    <script src="fluid.js"></script>
+    <script src="waves.js"></script>
+    <script src="collision.js"></script>
+</body>
+</html>
