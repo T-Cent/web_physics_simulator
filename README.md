@@ -6,16 +6,21 @@ As of right now we've implemented the following features/topics:
 
 1. Visualizing chaos motion / the butterfly effect
 1. Visualizing electric field lines due to multiple point charges
-1. The infinite well though experiment (*)
+1. The infinite well experiment^
 1. Fluid dynamics (interaction with a stationary obstacle)
 1. Wave interference
 1. Elastic collisions
 1. Rigid body dynamics
 1. Basic kinematics
 
-We hope to continue work on this after semester if time permits, as this is something we're passionate towards and we get to learn many new technologies, namely,
+*^ broken due to precision issues*
 
 [**Babylon.js**](https://www.babylonjs.com/) and [**three.js**](https://threejs.org/) were used for the 3d workload, while the normal HTML `<canvas>` element was used for most of the 2d stuff.
+
+## Future
+
+We hope to continue work on this after semester if time permits, as this is something we're passionate towards and we get to learn many new technologies, namely,
+
 
 Feel free open up an issue or a pull request if you seek clarification or want to contribute, respectively.
 
