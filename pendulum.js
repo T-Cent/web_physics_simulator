@@ -234,6 +234,94 @@ function resetPendulum() {
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
+    // Get slider elements
+    const angle1Slider = document.getElementById('angle1-slider');
+    const angle2Slider = document.getElementById('angle2-slider');
+    const length1Slider = document.getElementById('length1-slider');
+    const length2Slider = document.getElementById('length2-slider');
+    const mass1Slider = document.getElementById('mass1-slider');
+    const mass2Slider = document.getElementById('mass2-slider');
+    const gravitySlider = document.getElementById('gravity-slider');
+    const dampingSlider = document.getElementById('damping-slider');
+
+    // Get value display elements
+    const angle1Value = document.getElementById('angle1-value');
+    const angle2Value = document.getElementById('angle2-value');
+    const length1Value = document.getElementById('length1-value');
+    const length2Value = document.getElementById('length2-value');
+    const mass1Value = document.getElementById('mass1-value');
+    const mass2Value = document.getElementById('mass2-value');
+    const gravityValue = document.getElementById('gravity-value');
+    const dampingValue = document.getElementById('damping-value');
+    
+    // Add event listeners for sliders
+    angle1Slider.addEventListener('input', function() {
+        // Convert from degrees to radians
+        angle1 = (this.value * Math.PI) / 180;
+        angle1Value.textContent = `${this.value}°`;
+        
+        // If simulation is paused, redraw the pendulum with new values
+        if (!isPendulumRunning) {
+            animatePendulum();
+        }
+    });
+    
+    angle2Slider.addEventListener('input', function() {
+        // Convert from degrees to radians
+        angle2 = (this.value * Math.PI) / 180;
+        angle2Value.textContent = `${this.value}°`;
+        
+        if (!isPendulumRunning) {
+            animatePendulum();
+        }
+    });
+    
+    length1Slider.addEventListener('input', function() {
+        length1 = parseInt(this.value);
+        length1Value.textContent = this.value;
+        
+        if (!isPendulumRunning) {
+            animatePendulum();
+        }
+    });
+    
+    length2Slider.addEventListener('input', function() {
+        length2 = parseInt(this.value);
+        length2Value.textContent = this.value;
+        
+        if (!isPendulumRunning) {
+            animatePendulum();
+        }
+    });
+    
+    mass1Slider.addEventListener('input', function() {
+        mass1 = parseInt(this.value);
+        mass1Value.textContent = this.value;
+        
+        if (!isPendulumRunning) {
+            animatePendulum();
+        }
+    });
+    
+    mass2Slider.addEventListener('input', function() {
+        mass2 = parseInt(this.value);
+        mass2Value.textContent = this.value;
+        
+        if (!isPendulumRunning) {
+            animatePendulum();
+        }
+    });
+    
+    gravitySlider.addEventListener('input', function() {
+        gravity = parseFloat(this.value);
+        gravityValue.textContent = parseFloat(this.value).toFixed(1);
+    });
+    
+    dampingSlider.addEventListener('input', function() {
+        damping = parseFloat(this.value);
+        dampingValue.textContent = parseFloat(this.value).toFixed(3);
+    });
+
     // Initialize simulations when their tab is active
     const simNavLinks = document.querySelectorAll('.sim-nav a');
     simNavLinks.forEach(link => {

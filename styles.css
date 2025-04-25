@@ -447,6 +447,76 @@ nav {
     background-color: var(--secondary-color);
 }
 
+.slider-container {
+    margin-top: 15px;
+    padding: 15px;
+    background-color: #f5f5f5;
+    border-radius: 5px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.slider-group {
+    margin-bottom: 12px;
+}
+
+/* Slider label styles */
+.slider-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+}
+
+/* Slider styles */
+.slider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 8px;
+    border-radius: 4px;
+    background: #d3d3d3;
+    outline: none;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.slider:hover {
+    opacity: 1;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #3f51b5;
+    cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #3f51b5;
+    cursor: pointer;
+}
+
+/* Responsive styling */
+@media (min-width: 768px) {
+    .simulation-controls {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .button-group {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+}
+
 /* Testimonials */
 .testimonials {
     padding: 5rem 1rem;
