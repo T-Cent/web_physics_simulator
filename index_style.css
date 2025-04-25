@@ -342,29 +342,36 @@
   }
   
   #preview-pendulum {
-    background-image: url('images/pendulum.jpg');
+    background-image: url('images/Double-Pendulum.png');
   }
   
   #preview-electric {
-    background-image: url('images/electric-field.jpg');
+    background-image: url('images/electric-field.png');
   }
   
   #preview-quantum {
-    background-image: url('images/quantum.jpg');
+    background-image: url('images/InfiniteSquareWellAnimation.gif');
   }
   
   #preview-fluid {
-    background-image: url('images/fluid-dynamics.jpg');
+    background-image: url('images/fluid.jpg');
   }
   
   #preview-waves {
-    background-image: url('images/waves.jpg');
+    background-image: url('images/waves.webp');
   }
   
   #preview-collision {
-    background-image: url('images/collisions.jpg');
+    background-image: url('images/collision.webp');
   }
   
+  #preview-rigid {
+    background-image: url('images/rigid.png');
+  }
+  #preview-kinematics {
+    background-image: url('images/kinematics.webp');
+  }
+
   .sim-preview-card h3 {
     padding: var(--spacing-md) var(--spacing-md) 0.5rem;
     font-size: 1.25rem;

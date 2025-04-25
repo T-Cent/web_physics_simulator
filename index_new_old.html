@@ -1,0 +1,1906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhysLab | Interactive Physics Simulations</title>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/inter-ui/3.19.3/inter.min.css">
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Cannon.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.6.2/cannon.min.js"></script>
+    <!-- OrbitControls for Three.js -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <style>
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent: #3b82f6;
+            --accent-hover: #60a5fa;
+            --card-bg: #1e293b;
+            --nav-height: 70px;
+            --header-height: 80vh;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+        
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: var(--nav-height);
+            background-color: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .logo span {
+            color: var(--accent);
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+        
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            position: relative;
+            transition: color 0.3s ease;
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--accent);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            color: var(--text-primary);
+        }
+        
+        .nav-link:hover::after {
+            width: 100%;
+        }
+        
+        .cta-button {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            text-decoration: none;
+        }
+        
+        .cta-button:hover {
+            background-color: var(--accent-hover);
+            transform: translateY(-2px);
+        }
+        
+        /* Header */
+        header {
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header-content {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1.5rem;
+            width: 100%;
+            max-width: 650px;
+            z-index: 1;
+        }
+        
+        .header-title {
+            font-size: 3.5rem;
+            line-height: 1.2;
+            font-weight: 800;
+        }
+        
+        .header-description {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+        
+        .header-cta {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .secondary-button {
+            background-color: transparent;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            text-decoration: none;
+        }
+        
+        .secondary-button:hover {
+            background-color: rgba(59, 130, 246, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        /* Background Animation */
+        .bg-animation {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 50%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.5;
+        }
+        
+        /* Features Section */
+        .features {
+            padding: 6rem 0;
+        }
+        
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 3rem;
+            text-align: center;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .feature-card {
+            background-color: var(--card-bg);
+            border-radius: 0.75rem;
+            padding: 2rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .feature-icon {
+            font-size: 2rem;
+            color: var(--accent);
+            margin-bottom: 1.5rem;
+        }
+        
+        .feature-title {
+            font-size: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .feature-description {
+            color: var(--text-secondary);
+        }
+        
+        /* Footer */
+        footer {
+            background-color: var(--bg-secondary);
+            padding: 3rem 0;
+            margin-top: 4rem;
+        }
+        
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .footer-links {
+            display: flex;
+            gap: 2rem;
+        }
+        
+        .footer-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .footer-link:hover {
+            color: var(--text-primary);
+        }
+        
+        .copyright {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+        
+        /* Responsive Design */
+        @media screen and (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .header-title {
+                font-size: 2.5rem;
+            }
+            
+            .header-description {
+                font-size: 1rem;
+            }
+            
+            .bg-animation {
+                width: 80%;
+            }
+            
+            .footer-content {
+                flex-direction: column;
+                gap: 2rem;
+            }
+        }
+
+        /* Canvas animation */
+        canvas {
+            position: absolute;
+            top: 0;
+            right: 0;
+            z-index: 0;
+        }
+
+        /* Simulation Styles */
+        .simulation-container {
+            margin-bottom: 4rem;
+        }
+
+        .simulation-title {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .sim-button {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            font-size: 0.875rem;
+        }
+
+        .sim-button:hover {
+            background-color: var(--accent-hover);
+            transform: translateY(-1px);
+        }
+
+        .sim-button:active {
+            transform: translateY(0);
+        }
+
+        /* Simulation Controls */
+        .physics-controls {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(15, 23, 42, 0.9);
+            padding: 1rem;
+            border-radius: 0.75rem;
+            width: 250px;
+            z-index: 10;
+        }
+
+        .control-group {
+            margin-bottom: 1rem;
+        }
+
+        .control-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .control-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+        }
+
+        .control-value {
+            color: var(--accent);
+            font-weight: 500;
+        }
+
+        .slider {
+            width: 100%;
+            height: 4px;
+            background: var(--bg-secondary);
+            border-radius: 2px;
+            appearance: none;
+            outline: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: var(--accent);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .slider::-webkit-slider-thumb:hover {
+            background: var(--accent-hover);
+        }
+
+        .slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            background: var(--accent);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            border: none;
+        }
+
+        .slider::-moz-range-thumb:hover {
+            background: var(--accent-hover);
+        }
+
+        .kinematics-data {
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .data-title {
+            color: var(--text-primary);
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+        }
+
+        .data-item {
+            background: rgba(15, 23, 42, 0.3);
+            padding: 0.5rem;
+            border-radius: 0.375rem;
+        }
+
+        .data-label {
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        .data-value {
+            color: var(--accent);
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="container nav-content">
+            <a href="#" class="logo">
+                <i class="fas fa-atom"></i>
+                Phys<span>Lab</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="#" class="nav-link">Home</a></li>
+                <li><a href="#simulations" class="nav-link">Simulations</a></li>
+                <li><a href="#features" class="nav-link">Features</a></li>
+                <li><a href="#about" class="nav-link">About</a></li>
+            </ul>
+            <a href="#simulations" class="cta-button">Launch Simulator</a>
+        </div>
+    </nav>
+    
+    <!-- Header -->
+    <header>
+        <div class="container header-content">
+            <h1 class="header-title">Interactive Physics Simulations for Modern Learning</h1>
+            <p class="header-description">
+                Explore complex physical phenomena through intuitive, interactive simulations. 
+                Perfect for students, educators, and physics enthusiasts alike.
+            </p>
+            <div class="header-cta">
+                <a href="#simulations" class="cta-button">Explore Simulations</a>
+                <a href="#about" class="secondary-button">Learn More</a>
+            </div>
+        </div>
+        <div class="bg-animation">
+            <canvas id="physicsCanvas"></canvas>
+        </div>
+    </header>
+    
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="container">
+            <h2 class="section-title">Why Choose PhysLab?</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-vr-cardboard"></i>
+                    </div>
+                    <h3 class="feature-title">Interactive Simulations</h3>
+                    <p class="feature-description">
+                        Manipulate variables in real-time and observe how physical systems respond to changes.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <h3 class="feature-title">Educational Focus</h3>
+                    <p class="feature-description">
+                        Designed with learning in mind, our simulations help visualize abstract concepts.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-desktop"></i>
+                    </div>
+                    <h3 class="feature-title">Cross-Platform</h3>
+                    <p class="feature-description">
+                        Access your simulations from any device with a modern web browser.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Simulation Preview Section -->
+    <section id="simulations" class="features">
+        <div class="container">
+            <h2 class="section-title">Available Simulations</h2>
+            
+            <!-- Rigid Body Physics Simulation -->
+            <div class="simulation-container">
+                <h3 class="simulation-title">3D Physics Lab</h3>
+                <div id="rigid-body-simulation" style="width: 100%; height: 500px; background: var(--card-bg); border-radius: 0.75rem; overflow: hidden; margin-bottom: 2rem; position: relative;">
+                    <!-- Controls -->
+                    <div class="simulation-controls" style="position: absolute; top: 1rem; left: 1rem; z-index: 10; display: flex; gap: 0.5rem; flex-wrap: wrap; max-width: 100%; padding: 0.5rem;">
+                        <button id="add-cube" class="sim-button">Add Cube</button>
+                        <button id="add-sphere" class="sim-button">Add Sphere</button>
+                        <button id="add-cylinder" class="sim-button">Add Cylinder</button>
+                        <button id="toggle-gravity" class="sim-button">Toggle Gravity</button>
+                        <button id="reset-simulation" class="sim-button">Reset</button>
+                    </div>
+
+                    <!-- Physics Controls -->
+                    <div class="physics-controls">
+                        <div class="control-group">
+                            <div class="control-label">
+                                <span>Gravity</span>
+                                <span class="control-value" id="gravity-value">9.82</span>
+                            </div>
+                            <input type="range" id="gravity-slider" class="slider" 
+                                min="0" max="20" step="0.1" value="9.82">
+                        </div>
+                        <div class="control-group">
+                            <div class="control-label">
+                                <span>Friction</span>
+                                <span class="control-value" id="friction-value">0.3</span>
+                            </div>
+                            <input type="range" id="friction-slider" class="slider" 
+                                min="0" max="1" step="0.05" value="0.3">
+                        </div>
+                        <div class="control-group">
+                            <div class="control-label">
+                                <span>Restitution</span>
+                                <span class="control-value" id="restitution-value">0.7</span>
+                            </div>
+                            <input type="range" id="restitution-slider" class="slider" 
+                                min="0" max="1" step="0.05" value="0.7">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kinematics Simulation -->
+            <div class="simulation-container">
+                <h3 class="simulation-title">Kinematics Lab: Projectile Motion</h3>
+                <div id="kinematics-simulation" style="width: 100%; height: 500px; background: var(--card-bg); border-radius: 0.75rem; overflow: hidden; margin-bottom: 2rem; position: relative;">
+                    <!-- Controls -->
+                    <div class="simulation-controls" style="position: absolute; top: 1rem; left: 1rem; z-index: 10; display: flex; gap: 0.5rem; flex-wrap: wrap; max-width: 100%; padding: 0.5rem;">
+                        <button id="launch-projectile" class="sim-button">Launch</button>
+                        <button id="toggle-trail" class="sim-button">Toggle Trail</button>
+                        <button id="reset-kinematics" class="sim-button">Reset</button>
+                    </div>
+
+                    <!-- Kinematics Controls -->
+                    <div class="physics-controls">
+                        <div class="control-group">
+                            <div class="control-label">
+                                <span>Velocity X (m/s)</span>
+                                <span class="control-value" id="velocity-x-value">10.0</span>
+                            </div>
+                            <input type="range" id="velocity-x-slider" class="slider" 
+                                min="-20" max="20" step="0.5" value="10">
+                        </div>
+                        <div class="control-group">
+                            <div class="control-label">
+                                <span>Velocity Y (m/s)</span>
+                                <span class="control-value" id="velocity-y-value">15.0</span>
+                            </div>
+                            <input type="range" id="velocity-y-slider" class="slider" 
+                                min="0" max="30" step="0.5" value="15">
+                        </div>
+                        <div class="control-group">
+                            <div class="control-label">
+                                <span>Velocity Z (m/s)</span>
+                                <span class="control-value" id="velocity-z-value">0.0</span>
+                            </div>
+                            <input type="range" id="velocity-z-slider" class="slider" 
+                                min="-20" max="20" step="0.5" value="0">
+                        </div>
+                        <div class="control-group">
+                            <div class="control-label">
+                                <span>Height (m)</span>
+                                <span class="control-value" id="height-value">0.0</span>
+                            </div>
+                            <input type="range" id="height-slider" class="slider" 
+                                min="0" max="20" step="0.5" value="0">
+                        </div>
+
+                        <!-- Motion Data -->
+                        <div class="kinematics-data">
+                            <div class="data-title">Motion Data</div>
+                            <div class="data-grid">
+                                <div class="data-item">
+                                    <span class="data-label">Time:</span>
+                                    <span class="data-value" id="time-value">0.00 s</span>
+                                </div>
+                                <div class="data-item">
+                                    <span class="data-label">Distance:</span>
+                                    <span class="data-value" id="distance-value">0.00 m</span>
+                                </div>
+                                <div class="data-item">
+                                    <span class="data-label">Max Height:</span>
+                                    <span class="data-value" id="max-height-value">0.00 m</span>
+                                </div>
+                                <div class="data-item">
+                                    <span class="data-label">Current Speed:</span>
+                                    <span class="data-value" id="current-speed-value">0.00 m/s</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Electromagnetic Field Simulation -->
+            <div class="simulation-container">
+                <h3 class="simulation-title">Electromagnetic Field Lab</h3>
+                <div id="em-simulation" style="width: 100%; height: 500px; background: var(--card-bg); border-radius: 0.75rem; overflow: hidden; margin-bottom: 2rem; position: relative;">
+                    <!-- Controls -->
+                    <div class="simulation-controls" style="position: absolute; top: 1rem; left: 1rem; z-index: 10; display: flex; gap: 0.5rem; flex-wrap: wrap; max-width: 100%; padding: 0.5rem;">
+                        <button id="add-positive" class="sim-button">Add + Charge</button>
+                        <button id="add-negative" class="sim-button">Add - Charge</button>
+                        <button id="add-current" class="sim-button">Add Current Loop</button>
+                        <button id="toggle-field-lines" class="sim-button">Toggle Field Lines</button>
+                        <button id="reset-em" class="sim-button">Reset</button>
+                    </div>
+
+                    <!-- EM Field Controls -->
+                    <div class="physics-controls">
+                        <div class="control-group">
+                            <div class="control-label">
+                                <span>Charge Magnitude</span>
+                                <span class="control-value" id="charge-value">1.0</span>
+                            </div>
+                            <input type="range" id="charge-slider" class="slider" 
+                                min="0.1" max="5.0" step="0.1" value="1.0">
+                        </div>
+                        <div class="control-group">
+                            <div class="control-label">
+                                <span>Current Magnitude</span>
+                                <span class="control-value" id="current-value">1.0</span>
+                            </div>
+                            <input type="range" id="current-slider" class="slider" 
+                                min="0.1" max="5.0" step="0.1" value="1.0">
+                        </div>
+                        <div class="control-group">
+                            <div class="control-label">
+                                <span>Field Line Density</span>
+                                <span class="control-value" id="density-value">1.0</span>
+                            </div>
+                            <input type="range" id="density-slider" class="slider" 
+                                min="0.2" max="2.0" step="0.1" value="1.0">
+                        </div>
+
+                        <!-- Field Data -->
+                        <div class="em-data">
+                            <div class="data-title">Field Data</div>
+                            <div class="data-grid">
+                                <div class="data-item">
+                                    <span class="data-label">E-Field Strength:</span>
+                                    <span class="data-value" id="e-field-value">0.00 N/C</span>
+                                </div>
+                                <div class="data-item">
+                                    <span class="data-label">B-Field Strength:</span>
+                                    <span class="data-value" id="b-field-value">0.00 T</span>
+                                </div>
+                                <div class="data-item">
+                                    <span class="data-label">Total Energy:</span>
+                                    <span class="data-value" id="energy-value">0.00 J</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-project-diagram"></i>
+                    </div>
+                    <h3 class="feature-title">Particle Dynamics</h3>
+                    <p class="feature-description">
+                        Explore Newton's laws of motion with interactive particle simulations.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-magnet"></i>
+                    </div>
+                    <h3 class="feature-title">Electromagnetism</h3>
+                    <p class="feature-description">
+                        Visualize electric and magnetic fields and their interactions.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-wave-square"></i>
+                    </div>
+                    <h3 class="feature-title">Wave Mechanics</h3>
+                    <p class="feature-description">
+                        Study wave properties, interference, and diffraction patterns.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer>
+        <div class="container footer-content">
+            <div class="footer-links">
+                <a href="#" class="footer-link">Home</a>
+                <a href="#simulations" class="footer-link">Simulations</a>
+                <a href="#features" class="footer-link">Features</a>
+                <a href="#about" class="footer-link">About</a>
+                <a href="#" class="footer-link">Contact</a>
+            </div>
+            <div class="copyright">
+                &copy; 2025 PhysLab. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript for background animation -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const canvas = document.getElementById('physicsCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Make canvas fill the container
+            function resizeCanvas() {
+                const container = document.querySelector('.bg-animation');
+                canvas.width = container.offsetWidth;
+                canvas.height = container.offsetHeight;
+            }
+            
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
+            
+            // Mouse position tracking
+            let mouse = {
+                x: null,
+                y: null,
+                radius: 150
+            };
+            
+            window.addEventListener('mousemove', function(event) {
+                // Get mouse position relative to canvas
+                const rect = canvas.getBoundingClientRect();
+                mouse.x = event.clientX - rect.left;
+                mouse.y = event.clientY - rect.top;
+            });
+            
+            // Particle class with enhanced tech aesthetics
+            class Particle {
+                constructor(x, y) {
+                    this.x = x;
+                    this.y = y;
+                    this.baseX = x; // For returning to original position
+                    this.baseY = y;
+                    this.density = (Math.random() * 30) + 1;
+                    this.size = Math.random() * 3 + 1;
+                    this.color = this.getRandomColor();
+                    
+                    // Velocity for drift motion
+                    this.vx = Math.random() * 0.4 - 0.2;
+                    this.vy = Math.random() * 0.4 - 0.2;
+                    
+                    // Physics properties 
+                    this.friction = 0.95;
+                    this.gravity = 0.01;
+                    
+                    // For connections
+                    this.maxConnections = 3;
+                    this.connections = [];
+                }
+                
+                getRandomColor() {
+                    // Techy color palette
+                    const colors = [
+                        'rgba(59, 130, 246, 0.7)',  // Blue
+                        'rgba(99, 102, 241, 0.7)',  // Indigo
+                        'rgba(16, 185, 129, 0.7)',  // Emerald
+                        'rgba(6, 182, 212, 0.7)',   // Cyan
+                        'rgba(124, 58, 237, 0.7)'   // Violet
+                    ];
+                    return colors[Math.floor(Math.random() * colors.length)];
+                }
+                
+                update() {
+                    // Drift motion
+                    this.x += this.vx;
+                    this.y += this.vy;
+                    
+                    // Gentle bounce at borders
+                    if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                    if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+                    
+                    // Mouse interaction
+                    if (mouse.x != null && mouse.y != null) {
+                        const dx = mouse.x - this.x;
+                        const dy = mouse.y - this.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        
+                        if (distance < mouse.radius) {
+                            // Calculate force direction
+                            const forceDirectionX = dx / distance;
+                            const forceDirectionY = dy / distance;
+                            
+                            // Calculate force strength based on distance
+                            const force = (mouse.radius - distance) / mouse.radius;
+                            
+                            // Dynamic color change on mouse hover
+                            this.color = `rgba(${24 + Math.random() * 50}, ${144 + Math.random() * 50}, ${255}, ${0.7 + force * 0.3})`;
+                            
+                            // Apply force (attraction to mouse)
+                            const dirX = forceDirectionX * force * this.density;
+                            const dirY = forceDirectionY * force * this.density;
+                            
+                            this.x += dirX;
+                            this.y += dirY;
+                        } else {
+                            // Gradually return to original color
+                            this.color = this.getRandomColor();
+                        }
+                    }
+                }
+                
+                draw() {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fillStyle = this.color;
+                    ctx.fill();
+                }
+                
+                connect(particles) {
+                    this.connections = [];
+                    
+                    // Fixed connection distance
+                    const connectionDist = 100;
+                    
+                    particles.forEach(particle => {
+                        if (particle === this) return;
+                        
+                        const distance = Math.sqrt(
+                            Math.pow(this.x - particle.x, 2) +
+                            Math.pow(this.y - particle.y, 2)
+                        );
+                        
+                        // Dynamic connection distance based on mouse position
+                        let connectionDistance = connectionDist;
+                        
+                        if (mouse.x != null && mouse.y != null) {
+                            const mouseDistanceToThis = Math.sqrt(
+                                Math.pow(mouse.x - this.x, 2) + 
+                                Math.pow(mouse.y - this.y, 2)
+                            );
+                            
+                            if (mouseDistanceToThis < mouse.radius) {
+                                connectionDistance = 150; // Increase connection distance near mouse
+                            }
+                        }
+                        
+                        if (distance < connectionDistance) {
+                            this.connections.push({
+                                particle,
+                                distance
+                            });
+                        }
+                    });
+                    
+                    // Sort by distance and keep only maxConnections
+                    this.connections.sort((a, b) => a.distance - b.distance);
+                    this.connections = this.connections.slice(0, this.maxConnections);
+                    
+                    // Draw enhanced connections
+                    this.connections.forEach(connection => {
+                        ctx.beginPath();
+                        ctx.moveTo(this.x, this.y);
+                        ctx.lineTo(connection.particle.x, connection.particle.y);
+                        
+                        // Dynamic line width and color based on distance
+                        const opacity = 1 - connection.distance / connectionDist;
+                        const lineWidth = opacity * 2;
+                        
+                        // Check if mouse is near this connection
+                        let lineColor = `rgba(59, 130, 246, ${opacity * 0.4})`;
+                        
+                        if (mouse.x != null && mouse.y != null) {
+                            const mouseToLine = distToSegment(
+                                {x: mouse.x, y: mouse.y},
+                                {x: this.x, y: this.y},
+                                {x: connection.particle.x, y: connection.particle.y}
+                            );
+                            
+                            if (mouseToLine < 50) {
+                                // Highlight lines near mouse
+                                lineColor = `rgba(99, 102, 241, ${Math.min(1, opacity * 0.8 + 0.2)})`;
+                            }
+                        }
+                        
+                        ctx.strokeStyle = lineColor;
+                        ctx.lineWidth = lineWidth;
+                        ctx.stroke();
+                    });
+                }
+            }
+            
+            // Helper function to calculate distance from point to line segment
+            function sqr(x) { return x * x }
+            function dist2(v, w) { return sqr(v.x - w.x) + sqr(v.y - w.y) }
+            
+            function distToSegmentSquared(p, v, w) {
+                const l2 = dist2(v, w);
+                if (l2 === 0) return dist2(p, v);
+                let t = ((p.x - v.x) * (w.x - v.x) + (p.y - v.y) * (w.y - v.y)) / l2;
+                t = Math.max(0, Math.min(1, t));
+                return dist2(p, { 
+                    x: v.x + t * (w.x - v.x),
+                    y: v.y + t * (w.y - v.y) 
+                });
+            }
+            
+            function distToSegment(p, v, w) {
+                return Math.sqrt(distToSegmentSquared(p, v, w));
+            }
+            
+            // Create particles with an improved distribution
+            const particles = [];
+            const particleCount = 80; // More particles for a denser network
+            
+            function createParticles() {
+                for (let i = 0; i < particleCount; i++) {
+                    // Create grid-like distribution with some randomness
+                    const gridSize = Math.sqrt(particleCount);
+                    const cellWidth = canvas.width / gridSize;
+                    const cellHeight = canvas.height / gridSize;
+                    
+                    const gridX = i % gridSize;
+                    const gridY = Math.floor(i / gridSize);
+                    
+                    const x = (gridX * cellWidth) + (Math.random() * cellWidth);
+                    const y = (gridY * cellHeight) + (Math.random() * cellHeight);
+                    
+                    particles.push(new Particle(x, y));
+                }
+            }
+            
+            createParticles();
+            
+            // Add digital circuit effect (tech lines in background)
+            function drawCircuitLines() {
+                const lineCount = 8;
+                const lineWidth = 1;
+                const lineSpacing = canvas.height / lineCount;
+                
+                ctx.strokeStyle = 'rgba(59, 130, 246, 0.1)';
+                ctx.lineWidth = lineWidth;
+                
+                // Horizontal lines
+                for (let i = 0; i < lineCount; i++) {
+                    const y = i * lineSpacing;
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(0, y);
+                    
+                    // Create zigzags
+                    const segments = Math.floor(Math.random() * 5) + 5;
+                    const segmentWidth = canvas.width / segments;
+                    
+                    for (let j = 0; j <= segments; j++) {
+                        const x = j * segmentWidth;
+                        const yOffset = (j % 2 === 0) ? 0 : Math.random() * 20 - 10;
+                        ctx.lineTo(x, y + yOffset);
+                    }
+                    
+                    ctx.stroke();
+                }
+                
+                // Vertical lines
+                const vLineCount = 12;
+                const vLineSpacing = canvas.width / vLineCount;
+                
+                for (let i = 0; i < vLineCount; i++) {
+                    const x = i * vLineSpacing;
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(x, 0);
+                    
+                    // Create zigzags
+                    const segments = Math.floor(Math.random() * 5) + 5;
+                    const segmentHeight = canvas.height / segments;
+                    
+                    for (let j = 0; j <= segments; j++) {
+                        const y = j * segmentHeight;
+                        const xOffset = (j % 2 === 0) ? 0 : Math.random() * 20 - 10;
+                        ctx.lineTo(x + xOffset, y);
+                    }
+                    
+                    ctx.stroke();
+                }
+                
+                // Add some nodes at intersections
+                ctx.fillStyle = 'rgba(59, 130, 246, 0.2)';
+                for (let i = 0; i < 15; i++) {
+                    const x = Math.random() * canvas.width;
+                    const y = Math.random() * canvas.height;
+                    const size = Math.random() * 3 + 2;
+                    
+                    ctx.beginPath();
+                    ctx.arc(x, y, size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+            
+            // Animation loop with enhanced effects
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Draw tech background
+                drawCircuitLines();
+                
+                // Update and draw particles
+                particles.forEach(particle => {
+                    particle.update();
+                    particle.draw();
+                    particle.connect(particles);
+                });
+                
+                // Draw mouse interaction area
+                if (mouse.x != null && mouse.y != null) {
+                    ctx.beginPath();
+                    ctx.arc(mouse.x, mouse.y, 5, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(99, 102, 241, 0.8)';
+                    ctx.fill();
+                    
+                    // Pulse effect around mouse
+                    ctx.beginPath();
+                    ctx.arc(mouse.x, mouse.y, mouse.radius, 0, Math.PI * 2);
+                    ctx.strokeStyle = 'rgba(99, 102, 241, 0.15)';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                }
+                
+                requestAnimationFrame(animate);
+            }
+            
+            animate();
+            
+            // Reset mouse position when mouse leaves canvas
+            canvas.addEventListener('mouseleave', function() {
+                mouse.x = null;
+                mouse.y = null;
+            });
+            
+            // Make particles move away on click (physics simulation)
+            canvas.addEventListener('click', function(event) {
+                const rect = canvas.getBoundingClientRect();
+                const clickX = event.clientX - rect.left;
+                const clickY = event.clientY - rect.top;
+                
+                // Apply force to particles
+                particles.forEach(particle => {
+                    const dx = particle.x - clickX;
+                    const dy = particle.y - clickY;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < 150) {
+                        const angle = Math.atan2(dy, dx);
+                        const force = (150 - distance) / 10;
+                        
+                        particle.vx += Math.cos(angle) * force;
+                        particle.vy += Math.sin(angle) * force;
+                    }
+                });
+            });
+        });
+    </script>
+
+    <!-- Rigid Body Physics Simulation -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Scene setup
+            const container = document.getElementById('rigid-body-simulation');
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ antialias: true });
+            
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            container.appendChild(renderer.domElement);
+
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0x404040);
+            scene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+            directionalLight.position.set(10, 20, 10);
+            directionalLight.castShadow = true;
+            directionalLight.shadow.camera.left = -10;
+            directionalLight.shadow.camera.right = 10;
+            directionalLight.shadow.camera.top = 10;
+            directionalLight.shadow.camera.bottom = -10;
+            scene.add(directionalLight);
+
+            // Camera position
+            camera.position.set(0, 5, 10);
+            camera.lookAt(0, 0, 0);
+
+            // OrbitControls
+            const controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+
+            // Physics world
+            const world = new CANNON.World();
+            world.gravity.set(0, -9.82, 0);
+            world.broadphase = new CANNON.NaiveBroadphase();
+            world.solver.iterations = 10;
+
+            // Physics materials
+            const defaultMaterial = new CANNON.Material('default');
+            const defaultContact = new CANNON.ContactMaterial(
+                defaultMaterial,
+                defaultMaterial,
+                {
+                    friction: 0.3,
+                    restitution: 0.7
+                }
+            );
+            world.addContactMaterial(defaultContact);
+            world.defaultContactMaterial = defaultContact;
+
+            // Ground
+            const groundShape = new CANNON.Plane();
+            const groundBody = new CANNON.Body({ 
+                mass: 0,
+                material: defaultMaterial
+            });
+            groundBody.addShape(groundShape);
+            groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2);
+            world.addBody(groundBody);
+
+            // Ground mesh
+            const groundGeometry = new THREE.PlaneGeometry(20, 20);
+            const groundMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x3b82f6,
+                metalness: 0.3,
+                roughness: 0.4
+            });
+            const groundMesh = new THREE.Mesh(groundGeometry, groundMaterial);
+            groundMesh.receiveShadow = true;
+            groundMesh.rotation.x = -Math.PI / 2;
+            scene.add(groundMesh);
+
+            // Walls
+            const wallShape = new CANNON.Box(new CANNON.Vec3(10, 5, 0.5));
+            
+            // Back wall
+            const backWallBody = new CANNON.Body({ 
+                mass: 0,
+                material: defaultMaterial
+            });
+            backWallBody.addShape(wallShape);
+            backWallBody.position.set(0, 5, -10);
+            world.addBody(backWallBody);
+
+            // Back wall mesh
+            const wallGeometry = new THREE.BoxGeometry(20, 10, 1);
+            const wallMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x3b82f6,
+                transparent: true,
+                opacity: 0.3
+            });
+            const backWallMesh = new THREE.Mesh(wallGeometry, wallMaterial);
+            backWallMesh.position.copy(backWallBody.position);
+            backWallMesh.castShadow = true;
+            scene.add(backWallMesh);
+
+            // Objects array to track bodies and meshes
+            const objects = [];
+
+            // Materials
+            const objectMaterial = new THREE.MeshStandardMaterial({
+                color: 0x60a5fa,
+                metalness: 0.7,
+                roughness: 0.3
+            });
+
+            // Physics controls setup
+            const gravitySlider = document.getElementById('gravity-slider');
+            const frictionSlider = document.getElementById('friction-slider');
+            const restitutionSlider = document.getElementById('restitution-slider');
+            const gravityValue = document.getElementById('gravity-value');
+            const frictionValue = document.getElementById('friction-value');
+            const restitutionValue = document.getElementById('restitution-value');
+
+            // Update physics properties
+            function updatePhysicsProperties() {
+                const gravity = parseFloat(gravitySlider.value);
+                const friction = parseFloat(frictionSlider.value);
+                const restitution = parseFloat(restitutionSlider.value);
+
+                // Update display values
+                gravityValue.textContent = gravity.toFixed(2);
+                frictionValue.textContent = friction.toFixed(2);
+                restitutionValue.textContent = restitution.toFixed(2);
+
+                // Update world gravity
+                world.gravity.set(0, -gravity, 0);
+
+                // Update contact material properties
+                defaultContact.friction = friction;
+                defaultContact.restitution = restitution;
+
+                // Update existing objects
+                objects.forEach(obj => {
+                    const material = obj.body.material;
+                    material.friction = friction;
+                    material.restitution = restitution;
+                });
+            }
+
+            // Add event listeners for sliders
+            gravitySlider.addEventListener('input', updatePhysicsProperties);
+            frictionSlider.addEventListener('input', updatePhysicsProperties);
+            restitutionSlider.addEventListener('input', updatePhysicsProperties);
+
+            // Create object function
+            function createObject(shape, geometry) {
+                const body = new CANNON.Body({
+                    mass: 1,
+                    material: defaultMaterial
+                });
+                body.addShape(shape);
+                body.position.set(
+                    Math.random() * 2 - 1,
+                    5,
+                    Math.random() * 2 - 1
+                );
+                // Add random rotation
+                body.quaternion.setFromEuler(
+                    Math.random() * Math.PI,
+                    Math.random() * Math.PI,
+                    Math.random() * Math.PI
+                );
+                world.addBody(body);
+
+                const mesh = new THREE.Mesh(geometry, objectMaterial);
+                mesh.castShadow = true;
+                scene.add(mesh);
+
+                objects.push({ body, mesh });
+            }
+
+            // Add Cube button
+            document.getElementById('add-cube').addEventListener('click', function() {
+                const size = 1;
+                const shape = new CANNON.Box(new CANNON.Vec3(size/2, size/2, size/2));
+                const geometry = new THREE.BoxGeometry(size, size, size);
+                createObject(shape, geometry);
+            });
+
+            // Add Sphere button
+            document.getElementById('add-sphere').addEventListener('click', function() {
+                const radius = 0.5;
+                const shape = new CANNON.Sphere(radius);
+                const geometry = new THREE.SphereGeometry(radius, 32, 32);
+                createObject(shape, geometry);
+            });
+
+            // Add Cylinder button
+            document.getElementById('add-cylinder').addEventListener('click', function() {
+                const radius = 0.5;
+                const height = 1;
+                const shape = new CANNON.Cylinder(radius, radius, height, 20);
+                const geometry = new THREE.CylinderGeometry(radius, radius, height, 32);
+                createObject(shape, geometry);
+            });
+
+            // Toggle Gravity
+            document.getElementById('toggle-gravity').addEventListener('click', function() {
+                const currentGravity = parseFloat(gravitySlider.value);
+                gravitySlider.value = -currentGravity;
+                updatePhysicsProperties();
+            });
+
+            // Reset button
+            document.getElementById('reset-simulation').addEventListener('click', function() {
+                objects.forEach(obj => {
+                    world.remove(obj.body);
+                    scene.remove(obj.mesh);
+                });
+                objects.length = 0;
+            });
+
+            // Animation loop
+            const timeStep = 1 / 60;
+            function animate() {
+                requestAnimationFrame(animate);
+
+                world.step(timeStep);
+
+                objects.forEach(obj => {
+                    obj.mesh.position.copy(obj.body.position);
+                    obj.mesh.quaternion.copy(obj.body.quaternion);
+                });
+
+                controls.update();
+                renderer.render(scene, camera);
+            }
+            animate();
+
+            // Handle window resize
+            window.addEventListener('resize', function() {
+                const width = container.clientWidth;
+                const height = container.clientHeight;
+
+                camera.aspect = width / height;
+                camera.updateProjectionMatrix();
+                renderer.setSize(width, height);
+            });
+
+            // Prevent scrolling when interacting with the simulation
+            renderer.domElement.addEventListener('mousewheel', function(e) {
+                e.preventDefault();
+            });
+        });
+    </script>
+
+    <!-- Kinematics Simulation -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const container = document.getElementById('kinematics-simulation');
+            
+            // Three.js setup
+            const scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x1e293b);
+            
+            const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.position.set(15, 10, 15);
+            camera.lookAt(0, 0, 0);
+            
+            const renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.shadowMap.enabled = true;
+            container.appendChild(renderer.domElement);
+
+            // OrbitControls
+            const controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0x404040);
+            scene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+            directionalLight.position.set(10, 20, 10);
+            directionalLight.castShadow = true;
+            scene.add(directionalLight);
+
+            // Ground plane
+            const groundGeometry = new THREE.PlaneGeometry(40, 40, 20, 20);
+            const groundMaterial = new THREE.MeshPhongMaterial({
+                color: 0x3b82f6,
+                side: THREE.DoubleSide,
+                wireframe: false
+            });
+            const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+            ground.rotation.x = -Math.PI / 2;
+            ground.receiveShadow = true;
+            scene.add(ground);
+
+            // Grid helper
+            const gridHelper = new THREE.GridHelper(40, 40, 0x94a3b8, 0x94a3b8);
+            gridHelper.position.y = 0.01;
+            scene.add(gridHelper);
+
+            // Projectile
+            const projectileGeometry = new THREE.SphereGeometry(0.2, 32, 32);
+            const projectileMaterial = new THREE.MeshPhongMaterial({
+                color: 0x60a5fa,
+                shininess: 100
+            });
+            const projectile = new THREE.Mesh(projectileGeometry, projectileMaterial);
+            projectile.castShadow = true;
+            scene.add(projectile);
+
+            // Trail
+            let trailPoints = [];
+            const trailGeometry = new THREE.BufferGeometry();
+            const trailMaterial = new THREE.LineBasicMaterial({
+                color: 0x60a5fa,
+                opacity: 0.5,
+                transparent: true
+            });
+            const trail = new THREE.Line(trailGeometry, trailMaterial);
+            scene.add(trail);
+            let showTrail = true;
+
+            // Predicted trajectory
+            const trajectoryPoints = [];
+            const trajectoryGeometry = new THREE.BufferGeometry();
+            const trajectoryMaterial = new THREE.LineDashedMaterial({
+                color: 0x94a3b8,
+                dashSize: 0.5,
+                gapSize: 0.3,
+                opacity: 0.3,
+                transparent: true
+            });
+            const trajectory = new THREE.Line(trajectoryGeometry, trajectoryMaterial);
+            scene.add(trajectory);
+
+            // Physics parameters
+            const params = {
+                velocityX: 10.0,
+                velocityY: 15.0,
+                velocityZ: 0.0,
+                height: 0,
+                gravity: 9.81,
+                time: 0,
+                isLaunched: false
+            };
+
+            let maxHeight = 0;
+            let distance = 0;
+
+            // Calculate trajectory points
+            function calculateTrajectory() {
+                trajectoryPoints.length = 0;
+                const v0x = params.velocityX;
+                const v0y = params.velocityY;
+                const v0z = params.velocityZ;
+                
+                // Calculate time of flight (when projectile hits the ground)
+                const timeOfFlight = (v0y + Math.sqrt(v0y * v0y + 2 * params.gravity * params.height)) / params.gravity;
+                
+                // Generate trajectory points
+                for (let t = 0; t <= timeOfFlight; t += timeOfFlight / 50) {
+                    const x = v0x * t;
+                    const y = params.height + v0y * t - 0.5 * params.gravity * t * t;
+                    const z = v0z * t;
+                    trajectoryPoints.push(new THREE.Vector3(x, y, z));
+                }
+
+                // Update trajectory line
+                trajectoryGeometry.setFromPoints(trajectoryPoints);
+                trajectory.computeLineDistances();
+            }
+
+            // Update projectile position
+            function updateProjectile() {
+                if (!params.isLaunched) return;
+
+                const v0x = params.velocityX;
+                const v0y = params.velocityY;
+                const v0z = params.velocityZ;
+                
+                // Current position
+                const x = v0x * params.time;
+                const y = params.height + v0y * params.time - 0.5 * params.gravity * params.time * params.time;
+                const z = v0z * params.time;
+                
+                // Current velocity components
+                const vx = v0x;
+                const vy = v0y - params.gravity * params.time;
+                const vz = v0z;
+                const currentSpeed = Math.sqrt(vx * vx + vy * vy + vz * vz);
+                
+                // Update position
+                projectile.position.set(x, y, z);
+                
+                // Update trail
+                if (showTrail) {
+                    trailPoints.push(new THREE.Vector3(x, y, z));
+                    trailGeometry.setFromPoints(trailPoints);
+                }
+                
+                // Update max height and distance
+                maxHeight = Math.max(maxHeight, y);
+                distance = Math.sqrt(x * x + z * z);
+                
+                // Update data display
+                document.getElementById('time-value').textContent = params.time.toFixed(2) + ' s';
+                document.getElementById('distance-value').textContent = distance.toFixed(2) + ' m';
+                document.getElementById('max-height-value').textContent = maxHeight.toFixed(2) + ' m';
+                document.getElementById('current-speed-value').textContent = currentSpeed.toFixed(2) + ' m/s';
+                
+                // Check if projectile has hit the ground
+                if (y <= 0) {
+                    params.isLaunched = false;
+                    projectile.position.y = 0;
+                } else {
+                    params.time += 0.016; // Approximately 60 FPS
+                }
+            }
+
+            // Animation loop
+            function animate() {
+                requestAnimationFrame(animate);
+                updateProjectile();
+                controls.update();
+                renderer.render(scene, camera);
+            }
+
+            // Event listeners
+            document.getElementById('velocity-x-slider').addEventListener('input', function(e) {
+                params.velocityX = parseFloat(e.target.value);
+                document.getElementById('velocity-x-value').textContent = params.velocityX.toFixed(1);
+                calculateTrajectory();
+            });
+
+            document.getElementById('velocity-y-slider').addEventListener('input', function(e) {
+                params.velocityY = parseFloat(e.target.value);
+                document.getElementById('velocity-y-value').textContent = params.velocityY.toFixed(1);
+                calculateTrajectory();
+            });
+
+            document.getElementById('velocity-z-slider').addEventListener('input', function(e) {
+                params.velocityZ = parseFloat(e.target.value);
+                document.getElementById('velocity-z-value').textContent = params.velocityZ.toFixed(1);
+                calculateTrajectory();
+            });
+
+            document.getElementById('height-slider').addEventListener('input', function(e) {
+                params.height = parseFloat(e.target.value);
+                document.getElementById('height-value').textContent = params.height.toFixed(1);
+                projectile.position.y = params.height;
+                calculateTrajectory();
+            });
+
+            document.getElementById('launch-projectile').addEventListener('click', function() {
+                if (!params.isLaunched) {
+                    params.isLaunched = true;
+                    params.time = 0;
+                    maxHeight = params.height;
+                    distance = 0;
+                    trailPoints.length = 0;
+                    projectile.position.set(0, params.height, 0);
+                }
+            });
+
+            document.getElementById('reset-kinematics').addEventListener('click', function() {
+                params.isLaunched = false;
+                params.time = 0;
+                params.velocityX = 10.0;
+                params.velocityY = 15.0;
+                params.velocityZ = 0.0;
+                params.height = 0;
+                maxHeight = 0;
+                distance = 0;
+                trailPoints.length = 0;
+                
+                // Reset projectile position
+                projectile.position.set(0, params.height, 0);
+                
+                // Reset sliders and displays
+                document.getElementById('velocity-x-slider').value = params.velocityX;
+                document.getElementById('velocity-y-slider').value = params.velocityY;
+                document.getElementById('velocity-z-slider').value = params.velocityZ;
+                document.getElementById('height-slider').value = params.height;
+                
+                document.getElementById('velocity-x-value').textContent = params.velocityX.toFixed(1);
+                document.getElementById('velocity-y-value').textContent = params.velocityY.toFixed(1);
+                document.getElementById('velocity-z-value').textContent = params.velocityZ.toFixed(1);
+                document.getElementById('height-value').textContent = params.height.toFixed(1);
+                
+                document.getElementById('time-value').textContent = '0.00 s';
+                document.getElementById('distance-value').textContent = '0.00 m';
+                document.getElementById('max-height-value').textContent = '0.00 m';
+                document.getElementById('current-speed-value').textContent = '0.00 m/s';
+                
+                calculateTrajectory();
+            });
+
+            // Handle window resize
+            window.addEventListener('resize', function() {
+                const width = container.clientWidth;
+                const height = container.clientHeight;
+
+                camera.aspect = width / height;
+                camera.updateProjectionMatrix();
+                renderer.setSize(width, height);
+            });
+
+            // Initial trajectory calculation
+            calculateTrajectory();
+            
+            // Start animation loop
+            animate();
+        });
+    </script>
+
+    <!-- Electromagnetic Field Simulation -->
+    <script>
+        // Electromagnetic Field Simulation
+        const emScene = new THREE.Scene();
+        emScene.background = new THREE.Color(0x1a1a1a);
+        
+        const emCamera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+        emCamera.position.set(0, 5, 10);
+        
+        const emRenderer = new THREE.WebGLRenderer({ antialias: true });
+        const emContainer = document.getElementById('em-simulation');
+        emRenderer.setSize(emContainer.clientWidth, emContainer.clientHeight);
+        emContainer.appendChild(emRenderer.domElement);
+        
+        const emControls = new THREE.OrbitControls(emCamera, emRenderer.domElement);
+        emControls.enableDamping = true;
+        
+        // Grid and lighting
+        const emGrid = new THREE.GridHelper(20, 20, 0x404040, 0x404040);
+        emScene.add(emGrid);
+        
+        const emAmbientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        emScene.add(emAmbientLight);
+        
+        const emDirectionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        emDirectionalLight.position.set(5, 5, 5);
+        emScene.add(emDirectionalLight);
+        
+        // EM Field objects
+        let charges = [];
+        let currentLoops = [];
+        let fieldLines = [];
+        
+        class Charge {
+            constructor(position, magnitude) {
+                const geometry = new THREE.SphereGeometry(0.3, 32, 32);
+                const material = new THREE.MeshPhongMaterial({
+                    color: magnitude > 0 ? 0xff4444 : 0x4444ff,
+                    emissive: magnitude > 0 ? 0xff0000 : 0x0000ff,
+                    emissiveIntensity: 0.3
+                });
+                this.mesh = new THREE.Mesh(geometry, material);
+                this.mesh.position.copy(position);
+                this.magnitude = magnitude;
+                emScene.add(this.mesh);
+            }
+            
+            getFieldAt(point) {
+                const direction = new THREE.Vector3().subVectors(point, this.mesh.position);
+                const distance = direction.length();
+                if (distance < 0.1) return new THREE.Vector3();
+                return direction.normalize().multiplyScalar(this.magnitude / (distance * distance));
+            }
+        }
+        
+        class CurrentLoop {
+            constructor(position, radius = 1, segments = 64) {
+                const curve = new THREE.EllipseCurve(0, 0, radius, radius);
+                const points = curve.getPoints(segments);
+                const geometry = new THREE.BufferGeometry().setFromPoints(points);
+                const material = new THREE.LineBasicMaterial({ color: 0x00ff00 });
+                this.loop = new THREE.Line(geometry, material);
+                this.loop.position.copy(position);
+                this.loop.rotateX(Math.PI / 2);
+                this.magnitude = 1.0;
+                this.radius = radius;
+                emScene.add(this.loop);
+                
+                // Add arrow to show current direction
+                const arrowGeometry = new THREE.ConeGeometry(0.2, 0.4);
+                const arrowMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
+                this.arrow = new THREE.Mesh(arrowGeometry, arrowMaterial);
+                this.arrow.position.set(radius, 0, 0);
+                this.arrow.rotateZ(-Math.PI / 2);
+                this.loop.add(this.arrow);
+            }
+            
+            getFieldAt(point) {
+                const localPoint = new THREE.Vector3();
+                localPoint.copy(point).sub(this.loop.position);
+                const distance = localPoint.length();
+                if (distance < 0.1) return new THREE.Vector3();
+                
+                // Simplified magnetic field calculation
+                const direction = localPoint.normalize();
+                const fieldStrength = this.magnitude / (Math.pow(distance, 3));
+                return direction.multiplyScalar(fieldStrength);
+            }
+        }
+        
+        function createFieldLine(startPoint, isElectric = true) {
+            const points = [];
+            let currentPoint = startPoint.clone();
+            const steps = 50;
+            const stepSize = 0.2;
+            
+            for (let i = 0; i < steps; i++) {
+                points.push(currentPoint.clone());
+                
+                let field = new THREE.Vector3();
+                if (isElectric) {
+                    charges.forEach(charge => {
+                        field.add(charge.getFieldAt(currentPoint));
+                    });
+                } else {
+                    currentLoops.forEach(loop => {
+                        field.add(loop.getFieldAt(currentPoint));
+                    });
+                }
+                
+                if (field.length() < 0.001) break;
+                field.normalize().multiplyScalar(stepSize);
+                currentPoint.add(field);
+            }
+            
+            const geometry = new THREE.BufferGeometry().setFromPoints(points);
+            const material = new THREE.LineBasicMaterial({
+                color: isElectric ? 0xff8888 : 0x88ff88,
+                opacity: 0.6,
+                transparent: true
+            });
+            const line = new THREE.Line(geometry, material);
+            emScene.add(line);
+            fieldLines.push(line);
+        }
+        
+        function updateFieldLines() {
+            // Remove existing field lines
+            fieldLines.forEach(line => {
+                emScene.remove(line);
+                line.geometry.dispose();
+                line.material.dispose();
+            });
+            fieldLines = [];
+            
+            const density = parseFloat(document.getElementById('density-slider').value);
+            const radius = 3;
+            const points = 8 * Math.floor(density);
+            
+            // Create field lines for charges
+            charges.forEach(charge => {
+                for (let i = 0; i < points; i++) {
+                    const angle = (i / points) * Math.PI * 2;
+                    const startPoint = new THREE.Vector3(
+                        charge.mesh.position.x + Math.cos(angle) * radius,
+                        charge.mesh.position.y + Math.sin(angle) * radius,
+                        charge.mesh.position.z
+                    );
+                    createFieldLine(startPoint, true);
+                }
+            });
+            
+            // Create field lines for current loops
+            currentLoops.forEach(loop => {
+                for (let i = 0; i < points; i++) {
+                    const angle = (i / points) * Math.PI * 2;
+                    const startPoint = new THREE.Vector3(
+                        loop.loop.position.x + Math.cos(angle) * radius,
+                        loop.loop.position.y + Math.sin(angle) * radius,
+                        loop.loop.position.z
+                    );
+                    createFieldLine(startPoint, false);
+                }
+            });
+        }
+        
+        // Event Listeners
+        document.getElementById('add-positive').addEventListener('click', () => {
+            const position = new THREE.Vector3(
+                (Math.random() - 0.5) * 6,
+                0,
+                (Math.random() - 0.5) * 6
+            );
+            const magnitude = parseFloat(document.getElementById('charge-slider').value);
+            charges.push(new Charge(position, magnitude));
+            updateFieldLines();
+        });
+        
+        document.getElementById('add-negative').addEventListener('click', () => {
+            const position = new THREE.Vector3(
+                (Math.random() - 0.5) * 6,
+                0,
+                (Math.random() - 0.5) * 6
+            );
+            const magnitude = -parseFloat(document.getElementById('charge-slider').value);
+            charges.push(new Charge(position, magnitude));
+            updateFieldLines();
+        });
+        
+        document.getElementById('add-current').addEventListener('click', () => {
+            const position = new THREE.Vector3(
+                (Math.random() - 0.5) * 6,
+                0,
+                (Math.random() - 0.5) * 6
+            );
+            const loop = new CurrentLoop(position);
+            loop.magnitude = parseFloat(document.getElementById('current-slider').value);
+            currentLoops.push(loop);
+            updateFieldLines();
+        });
+        
+        document.getElementById('reset-em').addEventListener('click', () => {
+            charges.forEach(charge => {
+                emScene.remove(charge.mesh);
+                charge.mesh.geometry.dispose();
+                charge.mesh.material.dispose();
+            });
+            charges = [];
+            
+            currentLoops.forEach(loop => {
+                emScene.remove(loop.loop);
+                loop.loop.geometry.dispose();
+                loop.loop.material.dispose();
+            });
+            currentLoops = [];
+            
+            updateFieldLines();
+        });
+        
+        document.getElementById('toggle-field-lines').addEventListener('click', () => {
+            fieldLines.forEach(line => {
+                line.visible = !line.visible;
+            });
+        });
+        
+        ['charge-slider', 'current-slider', 'density-slider'].forEach(id => {
+            document.getElementById(id).addEventListener('input', (e) => {
+                document.getElementById(id.replace('-slider', '-value')).textContent = e.target.value;
+                if (id === 'density-slider') {
+                    updateFieldLines();
+                }
+            });
+        });
+        
+        // Update field data display
+        function updateFieldData() {
+            const probePosition = new THREE.Vector3(0, 0, 0);
+            let eField = new THREE.Vector3();
+            let bField = new THREE.Vector3();
+            let totalEnergy = 0;
+            
+            charges.forEach(charge => {
+                eField.add(charge.getFieldAt(probePosition));
+                totalEnergy += Math.abs(charge.magnitude) * 0.5;
+            });
+            
+            currentLoops.forEach(loop => {
+                bField.add(loop.getFieldAt(probePosition));
+                totalEnergy += loop.magnitude * 0.5;
+            });
+            
+            document.getElementById('e-field-value').textContent = 
+                `${eField.length().toFixed(2)} N/C`;
+            document.getElementById('b-field-value').textContent = 
+                `${bField.length().toFixed(2)} T`;
+            document.getElementById('energy-value').textContent = 
+                `${totalEnergy.toFixed(2)} J`;
+        }
+        
+        // Animation loop
+        function animateEM() {
+            requestAnimationFrame(animateEM);
+            emControls.update();
+            updateFieldData();
+            emRenderer.render(emScene, emCamera);
+        }
+        
+        // Handle window resize
+        function onEMWindowResize() {
+            const width = emContainer.clientWidth;
+            const height = emContainer.clientHeight;
+            emCamera.aspect = width / height;
+            emCamera.updateProjectionMatrix();
+            emRenderer.setSize(width, height);
+        }
+        
+        window.addEventListener('resize', onEMWindowResize);
+        
+        // Start animation
+        animateEM();
+    </script>
+</body>
+</html>

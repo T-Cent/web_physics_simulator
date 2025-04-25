@@ -3,709 +3,744 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PhysLab - Rigid Body Simulation</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/babylonjs/5.0.0/babylon.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/babylonjs/5.0.0/havok.js"></script>
+    <title>PhysLab | Interactive Physics Simulations</title>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/inter-ui/3.19.3/inter.min.css">
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Cannon.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.6.2/cannon.min.js"></script>
+    <!-- OrbitControls for Three.js -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <style>
-        #renderCanvas {
-            width: 100%;
-            height: 100%;
-            touch-action: none;
-            position: absolute;
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent: #3b82f6;
+            --accent-hover: #60a5fa;
+            --card-bg: #1e293b;
+            --nav-height: 70px;
+            --header-height: 80vh;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+        
+        /* Navigation */
+        nav {
+            position: fixed;
             top: 0;
             left: 0;
-            z-index: -1;
-        }
-        
-        .simulation-container {
-            position: relative;
             width: 100%;
-            height: calc(100vh - 70px);
-            overflow: hidden;
-        }
-        
-        .shape-palette {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background-color: var(--card-bg);
-            padding: 15px;
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow);
-            z-index: 10;
-            border: 1px solid var(--border-color);
+            height: var(--nav-height);
+            background-color: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            display: flex;
+            align-items: center;
             transition: all 0.3s ease;
-            user-select: none;
         }
         
-        .shape-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-            padding: 10px;
-            border-radius: var(--radius-md);
-            background-color: rgba(255, 255, 255, 0.1);
-            cursor: pointer;
-            transition: all 0.2s ease;
-            user-select: none;
-        }
-        
-        .shape-item:hover {
-            background-color: rgba(var(--primary-color-rgb), 0.1);
-        }
-        
-        .shape-item:last-child {
-            margin-bottom: 0;
-        }
-        
-        .shape-icon {
-            width: 30px;
-            height: 30px;
-            margin-right: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .shape-icon i {
-            font-size: 20px;
-            color: var(--primary-color);
-        }
-        
-        .shape-label {
-            font-weight: 500;
-        }
-        
-        .properties-panel {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 300px;
-            background-color: var(--card-bg);
-            padding: 20px;
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow);
-            z-index: 10;
-            border: 1px solid var(--border-color);
-            transform: translateX(350px);
-            transition: transform 0.3s ease;
-            user-select: none;
-        }
-        
-        .properties-panel.active {
-            transform: translateX(0);
-        }
-        
-        .properties-title {
+        .nav-content {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid var(--border-color);
-        }
-        
-        .properties-title h3 {
-            margin: 0;
-            font-size: 1.2rem;
-        }
-        
-        .close-properties {
-            cursor: pointer;
-            font-size: 1.2rem;
-            color: var(--text-color);
-        }
-        
-        .property-group {
-            margin-bottom: 15px;
-        }
-        
-        .property-label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 500;
-            font-size: 0.9rem;
-        }
-        
-        .property-input {
             width: 100%;
-            padding: 8px 12px;
-            border-radius: var(--radius-md);
-            border: 1px solid var(--border-color);
-            background-color: var(--background-color);
-            color: var(--text-color);
-            font-size: 0.9rem;
         }
         
-        .property-slider {
-            width: 100%;
-            margin-top: 5px;
-            -webkit-appearance: none;
-            height: 5px;
-            border-radius: var(--radius-full);
-            background: var(--border-color);
-            outline: none;
-        }
-        
-        .property-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 15px;
-            height: 15px;
-            border-radius: 50%;
-            background: var(--primary-color);
-            cursor: pointer;
-        }
-        
-        .property-slider::-moz-range-thumb {
-            width: 15px;
-            height: 15px;
-            border-radius: 50%;
-            background: var(--primary-color);
-            cursor: pointer;
-        }
-        
-        .simulation-actions {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 10px;
-            z-index: 10;
-        }
-        
-        .action-button {
-            padding: 10px 20px;
-            border-radius: var(--radius-md);
-            background-color: var(--card-bg);
-            color: var(--text-color);
-            border: 1px solid var(--border-color);
-            cursor: pointer;
-            font-weight: 500;
-            transition: all 0.2s ease;
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
             display: flex;
             align-items: center;
-            gap: 8px;
-            user-select: none;
+            gap: 0.5rem;
         }
         
-        .action-button:hover {
-            background-color: var(--primary-color);
-            color: white;
+        .logo span {
+            color: var(--accent);
         }
         
-        .action-button i {
-            font-size: 1rem;
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
         }
         
-        .shape-preview {
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            position: relative;
+            transition: color 0.3s ease;
+        }
+        
+        .nav-link::after {
+            content: '';
             position: absolute;
-            pointer-events: none;
-            z-index: 1000;
-            opacity: 0.7;
-            display: none;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--accent);
+            transition: width 0.3s ease;
         }
         
-        .shape-preview i {
-            font-size: 30px;
-            color: var(--primary-color);
-            filter: drop-shadow(0 2px 5px rgba(0,0,0,0.2));
+        .nav-link:hover {
+            color: var(--text-primary);
         }
         
-        /* Additional simulation-specific CSS variables */
-        :root {
-            --primary-color-rgb: 58, 134, 255;
+        .nav-link:hover::after {
+            width: 100%;
         }
         
-        [data-theme="dark"] {
-            --primary-color-rgb: 77, 159, 255;
+        .cta-button {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            text-decoration: none;
+        }
+        
+        .cta-button:hover {
+            background-color: var(--accent-hover);
+            transform: translateY(-2px);
+        }
+        
+        /* Header */
+        header {
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header-content {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1.5rem;
+            width: 100%;
+            max-width: 650px;
+            z-index: 1;
+        }
+        
+        .header-title {
+            font-size: 3.5rem;
+            line-height: 1.2;
+            font-weight: 800;
+        }
+        
+        .header-description {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+        
+        .header-cta {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .secondary-button {
+            background-color: transparent;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            text-decoration: none;
+        }
+        
+        .secondary-button:hover {
+            background-color: rgba(59, 130, 246, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        /* Background Animation */
+        .bg-animation {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 50%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.5;
+        }
+        
+        /* Features Section */
+        .features {
+            padding: 6rem 0;
+        }
+        
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 3rem;
+            text-align: center;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .feature-card {
+            background-color: var(--card-bg);
+            border-radius: 0.75rem;
+            padding: 2rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .feature-icon {
+            font-size: 2rem;
+            color: var(--accent);
+            margin-bottom: 1.5rem;
+        }
+        
+        .feature-title {
+            font-size: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .feature-description {
+            color: var(--text-secondary);
+        }
+        
+        /* Footer */
+        footer {
+            background-color: var(--bg-secondary);
+            padding: 3rem 0;
+            margin-top: 4rem;
+        }
+        
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .footer-links {
+            display: flex;
+            gap: 2rem;
+        }
+        
+        .footer-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .footer-link:hover {
+            color: var(--text-primary);
+        }
+        
+        .copyright {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+        
+        /* Responsive Design */
+        @media screen and (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .header-title {
+                font-size: 2.5rem;
+            }
+            
+            .header-description {
+                font-size: 1rem;
+            }
+            
+            .bg-animation {
+                width: 80%;
+            }
+            
+            .footer-content {
+                flex-direction: column;
+                gap: 2rem;
+            }
+        }
+
+        /* Canvas animation */
+        canvas {
+            position: absolute;
+            top: 0;
+            right: 0;
+            z-index: 0;
+        }
+
+        /* Simulation Styles */
+        .simulation-container {
+            margin-bottom: 4rem;
+        }
+
+        .simulation-title {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .sim-button {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            font-size: 0.875rem;
+        }
+
+        .sim-button:hover {
+            background-color: var(--accent-hover);
+            transform: translateY(-1px);
+        }
+
+        .sim-button:active {
+            transform: translateY(0);
+        }
+
+        /* Simulation Controls */
+        .physics-controls {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(15, 23, 42, 0.9);
+            padding: 1rem;
+            border-radius: 0.75rem;
+            width: 250px;
+            z-index: 10;
+        }
+
+        .control-group {
+            margin-bottom: 1rem;
+        }
+
+        .control-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .control-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+        }
+
+        .control-value {
+            color: var(--accent);
+            font-weight: 500;
+        }
+
+        .slider {
+            width: 100%;
+            height: 4px;
+            background: var(--bg-secondary);
+            border-radius: 2px;
+            appearance: none;
+            outline: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: var(--accent);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .slider::-webkit-slider-thumb:hover {
+            background: var(--accent-hover);
+        }
+
+        .slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            background: var(--accent);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            border: none;
+        }
+
+        .slider::-moz-range-thumb:hover {
+            background: var(--accent-hover);
+        }
+
+        .kinematics-data {
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .data-title {
+            color: var(--text-primary);
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+        }
+
+        .data-item {
+            background: rgba(15, 23, 42, 0.3);
+            padding: 0.5rem;
+            border-radius: 0.375rem;
+        }
+
+        .data-label {
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        .data-value {
+            color: var(--accent);
+            font-weight: 500;
+            font-size: 0.875rem;
         }
     </style>
 </head>
-<body>
-    <header>
-        <nav>
-            <div class="logo">
-                <h1>PhysLab</h1>
-            </div>
-            <ul class="nav-links">
-                <li><a href="index.html">Home</a></li>
-                <li><a href="simulations.html" class="active">Simulations</a></li>
-                <li><a href="about.html">About Us</a></li>
-                <li class="theme-toggle">
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="theme-toggle-btn">
-                        <span class="toggle-slider"></span>
-                    </label>
-                    <span class="toggle-text">Dark Mode</span>
-                </li>
-            </ul>
-            <div class="burger">
-                <div class="line1"></div>
-                <div class="line2"></div>
-                <div class="line3"></div>
-            </div>
-        </nav>
-    </header>
 
-    <div class="simulation-container">
-        <canvas id="renderCanvas"></canvas>
-        
-        <div class="shape-palette">
-            <div class="shape-item" data-shape="box">
-                <div class="shape-icon">
-                    <i class="fas fa-cube"></i>
-                </div>
-                <div class="shape-label">Cube</div>
-            </div>
-            <div class="shape-item" data-shape="cylinder">
-                <div class="shape-icon">
-                    <i class="fas fa-database"></i>
-                </div>
-                <div class="shape-label">Cylinder</div>
-            </div>
-            <div class="shape-item" data-shape="sphere">
-                <div class="shape-icon">
-                    <i class="fas fa-circle"></i>
-                </div>
-                <div class="shape-label">Sphere</div>
-            </div>
+<body>
+
+<div class="simulation-container">
+    <h3 class="simulation-title">3D Physics Lab</h3>
+    <div id="rigid-body-simulation" style="width: 100%; height: 500px; background: var(--card-bg); border-radius: 0.75rem; overflow: hidden; margin-bottom: 2rem; position: relative;">
+        <!-- Controls -->
+        <div class="simulation-controls" style="position: absolute; top: 1rem; left: 1rem; z-index: 10; display: flex; gap: 0.5rem; flex-wrap: wrap; max-width: 100%; padding: 0.5rem;">
+            <button id="add-cube" class="sim-button">Add Cube</button>
+            <button id="add-sphere" class="sim-button">Add Sphere</button>
+            <button id="add-cylinder" class="sim-button">Add Cylinder</button>
+            <button id="toggle-gravity" class="sim-button">Toggle Gravity</button>
+            <button id="reset-simulation" class="sim-button">Reset</button>
         </div>
-        
-        <!-- Shape preview for drag and drop -->
-        <div class="shape-preview" id="shapePreview">
-            <i class="fas fa-cube"></i>
-        </div>
-        
-        <div class="properties-panel" id="propertiesPanel">
-            <div class="properties-title">
-                <h3>Properties</h3>
-                <div class="close-properties">
-                    <i class="fas fa-times"></i>
+
+        <!-- Physics Controls -->
+        <div class="physics-controls">
+            <div class="control-group">
+                <div class="control-label">
+                    <span>Gravity</span>
+                    <span class="control-value" id="gravity-value">9.82</span>
                 </div>
+                <input type="range" id="gravity-slider" class="slider" 
+                    min="0" max="20" step="0.1" value="9.82">
             </div>
-            
-            <div class="property-group">
-                <label class="property-label">Mass</label>
-                <input type="number" class="property-input" id="mass-input" value="1" min="0.1" max="100" step="0.1">
-                <input type="range" class="property-slider" id="mass-slider" min="0.1" max="100" value="1" step="0.1">
+            <div class="control-group">
+                <div class="control-label">
+                    <span>Friction</span>
+                    <span class="control-value" id="friction-value">0.3</span>
+                </div>
+                <input type="range" id="friction-slider" class="slider" 
+                    min="0" max="1" step="0.05" value="0.3">
             </div>
-            
-            <div class="property-group">
-                <label class="property-label">Friction</label>
-                <input type="number" class="property-input" id="friction-input" value="0.2" min="0" max="1" step="0.05">
-                <input type="range" class="property-slider" id="friction-slider" min="0" max="1" value="0.2" step="0.05">
+            <div class="control-group">
+                <div class="control-label">
+                    <span>Restitution</span>
+                    <span class="control-value" id="restitution-value">0.7</span>
+                </div>
+                <input type="range" id="restitution-slider" class="slider" 
+                    min="0" max="1" step="0.05" value="0.7">
             </div>
-            
-            <div class="property-group">
-                <label class="property-label">Restitution (Bounciness)</label>
-                <input type="number" class="property-input" id="restitution-input" value="0.7" min="0" max="1" step="0.05">
-                <input type="range" class="property-slider" id="restitution-slider" min="0" max="1" value="0.7" step="0.05">
-            </div>
-        </div>
-        
-        <div class="simulation-actions">
-            <button class="action-button" id="reset-scene">
-                <i class="fas fa-redo"></i> Reset Scene
-            </button>
-            <button class="action-button" id="toggle-gravity">
-                <i class="fas fa-arrow-down"></i> Toggle Gravity
-            </button>
         </div>
     </div>
+</div>
 
-    <script>
-        // Theme toggle functionality
-        const themeToggle = document.getElementById('theme-toggle-btn');
-        const body = document.body;
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Scene setup
+        const container = document.getElementById('rigid-body-simulation');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        container.appendChild(renderer.domElement);
 
-        // Check for saved theme preference
-        if (localStorage.getItem('theme') === 'dark') {
-            body.setAttribute('data-theme', 'dark');
-            themeToggle.checked = true;
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0x404040);
+        scene.add(ambientLight);
+
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        directionalLight.position.set(10, 20, 10);
+        directionalLight.castShadow = true;
+        directionalLight.shadow.camera.left = -10;
+        directionalLight.shadow.camera.right = 10;
+        directionalLight.shadow.camera.top = 10;
+        directionalLight.shadow.camera.bottom = -10;
+        scene.add(directionalLight);
+
+        // Camera position
+        camera.position.set(0, 5, 10);
+        camera.lookAt(0, 0, 0);
+
+        // OrbitControls
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+
+        // Physics world
+        const world = new CANNON.World();
+        world.gravity.set(0, -9.82, 0);
+        world.broadphase = new CANNON.NaiveBroadphase();
+        world.solver.iterations = 10;
+
+        // Physics materials
+        const defaultMaterial = new CANNON.Material('default');
+        const defaultContact = new CANNON.ContactMaterial(
+            defaultMaterial,
+            defaultMaterial,
+            {
+                friction: 0.3,
+                restitution: 0.7
+            }
+        );
+        world.addContactMaterial(defaultContact);
+        world.defaultContactMaterial = defaultContact;
+
+        // Ground
+        const groundShape = new CANNON.Plane();
+        const groundBody = new CANNON.Body({ 
+            mass: 0,
+            material: defaultMaterial
+        });
+        groundBody.addShape(groundShape);
+        groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2);
+        world.addBody(groundBody);
+
+        // Ground mesh
+        const groundGeometry = new THREE.PlaneGeometry(20, 20);
+        const groundMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x3b82f6,
+            metalness: 0.3,
+            roughness: 0.4
+        });
+        const groundMesh = new THREE.Mesh(groundGeometry, groundMaterial);
+        groundMesh.receiveShadow = true;
+        groundMesh.rotation.x = -Math.PI / 2;
+        scene.add(groundMesh);
+
+        // Walls
+        const wallShape = new CANNON.Box(new CANNON.Vec3(10, 5, 0.5));
+        
+        // Back wall
+        const backWallBody = new CANNON.Body({ 
+            mass: 0,
+            material: defaultMaterial
+        });
+        backWallBody.addShape(wallShape);
+        backWallBody.position.set(0, 5, -10);
+        world.addBody(backWallBody);
+
+        // Back wall mesh
+        const wallGeometry = new THREE.BoxGeometry(20, 10, 1);
+        const wallMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x3b82f6,
+            transparent: true,
+            opacity: 0.3
+        });
+        const backWallMesh = new THREE.Mesh(wallGeometry, wallMaterial);
+        backWallMesh.position.copy(backWallBody.position);
+        backWallMesh.castShadow = true;
+        scene.add(backWallMesh);
+
+        // Objects array to track bodies and meshes
+        const objects = [];
+
+        // Materials
+        const objectMaterial = new THREE.MeshStandardMaterial({
+            color: 0x60a5fa,
+            metalness: 0.7,
+            roughness: 0.3
+        });
+
+        // Physics controls setup
+        const gravitySlider = document.getElementById('gravity-slider');
+        const frictionSlider = document.getElementById('friction-slider');
+        const restitutionSlider = document.getElementById('restitution-slider');
+        const gravityValue = document.getElementById('gravity-value');
+        const frictionValue = document.getElementById('friction-value');
+        const restitutionValue = document.getElementById('restitution-value');
+
+        // Update physics properties
+        function updatePhysicsProperties() {
+            const gravity = parseFloat(gravitySlider.value);
+            const friction = parseFloat(frictionSlider.value);
+            const restitution = parseFloat(restitutionSlider.value);
+
+            // Update display values
+            gravityValue.textContent = gravity.toFixed(2);
+            frictionValue.textContent = friction.toFixed(2);
+            restitutionValue.textContent = restitution.toFixed(2);
+
+            // Update world gravity
+            world.gravity.set(0, -gravity, 0);
+
+            // Update contact material properties
+            defaultContact.friction = friction;
+            defaultContact.restitution = restitution;
+
+            // Update existing objects
+            objects.forEach(obj => {
+                const material = obj.body.material;
+                material.friction = friction;
+                material.restitution = restitution;
+            });
         }
 
-        themeToggle.addEventListener('change', function() {
-            if (this.checked) {
-                body.setAttribute('data-theme', 'dark');
-                localStorage.setItem('theme', 'dark');
-            } else {
-                body.removeAttribute('data-theme');
-                localStorage.setItem('theme', 'light');
-            }
-        });
+        // Add event listeners for sliders
+        gravitySlider.addEventListener('input', updatePhysicsProperties);
+        frictionSlider.addEventListener('input', updatePhysicsProperties);
+        restitutionSlider.addEventListener('input', updatePhysicsProperties);
 
-        // Mobile navigation toggle
-        const burger = document.querySelector('.burger');
-        const nav = document.querySelector('.nav-links');
-
-        burger.addEventListener('click', function() {
-            nav.classList.toggle('active');
-            // Animate burger menu
-            this.classList.toggle('toggle');
-        });
-
-        // Babylon.js Physics Simulation
-        window.addEventListener('DOMContentLoaded', async function() {
-            // Get the canvas element and engine
-            const canvas = document.getElementById('renderCanvas');
-            const engine = new BABYLON.Engine(canvas, true);
-            
-            // Storage for all created meshes
-            const sceneMeshes = [];
-            let selectedMesh = null;
-            const propertiesPanel = document.getElementById('propertiesPanel');
-            let gravityEnabled = true;
-            
-            // Shape preview element
-            const shapePreview = document.getElementById('shapePreview');
-            let currentDragShape = null;
-            
-            // Utility function to generate a random color
-            const getRandomColor = () => {
-                const h = 360 * Math.random();
-                const s = (50 + 50 * Math.random());
-                const l = (65 + 10 * Math.random());
-                return `hsl(${h}, ${s}%, ${l}%)`;
-            };
-            
-            // Create our scene
-            const createScene = async function() {
-                const scene = new BABYLON.Scene(engine);
-                
-                // Set up basic environment
-                const camera = new BABYLON.ArcRotateCamera("camera", -Math.PI / 2, Math.PI / 2.5, 15, new BABYLON.Vector3(0, 3, 0), scene);
-                camera.attachControl(canvas, true);
-                camera.upperBetaLimit = Math.PI / 2.2;
-                camera.lowerRadiusLimit = 5;
-                camera.upperRadiusLimit = 50;
-                
-                // Add lights
-                const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
-                light.intensity = 0.7;
-                
-                const directionalLight = new BABYLON.DirectionalLight("dirLight", new BABYLON.Vector3(-2, -5, 2), scene);
-                directionalLight.intensity = 0.5;
-                
-                // Create environment
-                const environmentTexture = BABYLON.CubeTexture.CreateFromPrefilteredData("https://assets.babylonjs.com/environments/environmentSpecular.env", scene);
-                scene.environmentTexture = environmentTexture;
-                scene.createDefaultSkybox(environmentTexture, true, 1000);
-                
-                // Create ground
-                const ground = BABYLON.MeshBuilder.CreateGround("ground", {width: 50, height: 50}, scene);
-                const groundMaterial = new BABYLON.StandardMaterial("groundMat", scene);
-                groundMaterial.diffuseColor = new BABYLON.Color3(0.2, 0.2, 0.2);
-                groundMaterial.specularColor = new BABYLON.Color3(0.1, 0.1, 0.1);
-                ground.material = groundMaterial;
-                ground.position.y = 0;
-                ground.receiveShadows = true;
-                
-                // Enable shadows
-                const shadowGenerator = new BABYLON.ShadowGenerator(1024, directionalLight);
-                shadowGenerator.useBlurExponentialShadowMap = true;
-                shadowGenerator.blurKernel = 32;
-                
-                // Initialize Havok Physics
-                const havokInstance = await HavokPhysics();
-                const havokPlugin = new BABYLON.HavokPlugin(true, havokInstance);
-                scene.enablePhysics(new BABYLON.Vector3(0, -9.81, 0), havokPlugin);
-                
-                // Add physics to ground
-                ground.physicsImpostor = new BABYLON.PhysicsImpostor(
-                    ground, 
-                    BABYLON.PhysicsImpostor.BoxImpostor, 
-                    { mass: 0, friction: 0.2, restitution: 0.7 }, 
-                    scene
-                );
-                
-                // Helper function to create physics objects
-                const createPhysicsObject = (shapeType, position) => {
-                    let mesh;
-                    let impostorType;
-                    const color = getRandomColor();
-                    const material = new BABYLON.StandardMaterial("objectMat", scene);
-                    material.diffuseColor = BABYLON.Color3.FromHexString(color);
-                    
-                    // Create different shapes based on type
-                    switch(shapeType) {
-                        case "box":
-                            mesh = BABYLON.MeshBuilder.CreateBox("box", {size: 1}, scene);
-                            impostorType = BABYLON.PhysicsImpostor.BoxImpostor;
-                            break;
-                        case "cylinder":
-                            mesh = BABYLON.MeshBuilder.CreateCylinder("cylinder", {height: 1, diameter: 1}, scene);
-                            impostorType = BABYLON.PhysicsImpostor.CylinderImpostor;
-                            break;
-                        case "sphere":
-                            mesh = BABYLON.MeshBuilder.CreateSphere("sphere", {diameter: 1}, scene);
-                            impostorType = BABYLON.PhysicsImpostor.SphereImpostor;
-                            break;
-                    }
-                    
-                    mesh.material = material;
-                    mesh.position = position || new BABYLON.Vector3(0, 5, 0);
-                    
-                    // Add physics properties
-                    mesh.physicsImpostor = new BABYLON.PhysicsImpostor(
-                        mesh, 
-                        impostorType, 
-                        { mass: 1, friction: 0.2, restitution: 0.7 }, 
-                        scene
-                    );
-                    
-                    // Add shadow
-                    shadowGenerator.addShadowCaster(mesh);
-                    
-                    // Store metadata
-                    mesh.shapeType = shapeType;
-                    
-                    // Add to array for tracking
-                    sceneMeshes.push(mesh);
-                    
-                    return mesh;
-                };
-                
-                // Modified drag and drop approach with click-based interaction
-                const shapePalette = document.querySelectorAll('.shape-item');
-                
-                // Handle shape item mouse down
-                shapePalette.forEach(item => {
-                    item.addEventListener('mousedown', function(e) {
-                        e.preventDefault(); // Prevent text selection
-                        
-                        const shapeType = this.getAttribute('data-shape');
-                        currentDragShape = shapeType;
-                        
-                        // Update preview icon
-                        let iconClass;
-                        switch(shapeType) {
-                            case "box": iconClass = "fa-cube"; break;
-                            case "cylinder": iconClass = "fa-database"; break;
-                            case "sphere": iconClass = "fa-circle"; break;
-                        }
-                        
-                        shapePreview.innerHTML = `<i class="fas ${iconClass}"></i>`;
-                        shapePreview.style.display = 'block';
-                        
-                        // Position the preview at the cursor
-                        shapePreview.style.left = `${e.clientX - 15}px`;
-                        shapePreview.style.top = `${e.clientY - 15}px`;
-                        
-                        // Add mousemove and mouseup event listeners to the document
-                        document.addEventListener('mousemove', handleMouseMove);
-                        document.addEventListener('mouseup', handleMouseUp);
-                    });
-                });
-                
-                // Handle mouse move during drag
-                const handleMouseMove = function(e) {
-                    e.preventDefault();
-                    
-                    // Update the preview position
-                    shapePreview.style.left = `${e.clientX - 15}px`;
-                    shapePreview.style.top = `${e.clientY - 15}px`;
-                };
-                
-                // Handle mouse up / drop
-                const handleMouseUp = function(e) {
-                    e.preventDefault();
-                    
-                    // Only process if we were dragging something
-                    if (currentDragShape) {
-                        // Hide the preview
-                        shapePreview.style.display = 'none';
-                        
-                        // Get the canvas bounds
-                        const canvasRect = canvas.getBoundingClientRect();
-                        
-                        // Check if we're dropping onto the canvas
-                        if (
-                            e.clientX >= canvasRect.left && 
-                            e.clientX <= canvasRect.right && 
-                            e.clientY >= canvasRect.top && 
-                            e.clientY <= canvasRect.bottom
-                        ) {
-                            // Convert screen coordinates to canvas coordinates
-                            const dropX = e.clientX - canvasRect.left;
-                            const dropY = e.clientY - canvasRect.top;
-                            
-                            // Convert to 3D position using raycasting
-                            const pickResult = scene.pick(dropX, dropY);
-                            let position;
-                            
-                            if (pickResult.hit) {
-                                position = pickResult.pickedPoint.clone();
-                                position.y += 1; // Place a bit above the hit point
-                            } else {
-                                // If no hit, place in front of camera
-                                const forward = camera.getTarget().subtract(camera.position).normalize();
-                                position = camera.position.add(forward.scale(10));
-                            }
-                            
-                            // Create the physics object
-                            createPhysicsObject(currentDragShape, position);
-                        }
-                        
-                        // Reset drag state
-                        currentDragShape = null;
-                    }
-                    
-                    // Remove document event listeners
-                    document.removeEventListener('mousemove', handleMouseMove);
-                    document.removeEventListener('mouseup', handleMouseUp);
-                };
-                
-                // Selection and Property Panel Logic
-                let highlightLayer = new BABYLON.HighlightLayer("hl", scene);
-                
-                // Handle object selection
-                scene.onPointerDown = function(evt, pickResult) {
-                    // Don't select objects if we're dragging
-                    if (currentDragShape) return;
-                    
-                    // Check if we picked a mesh that is not the ground
-                    if (pickResult.hit && pickResult.pickedMesh !== ground) {
-                        // Remove highlight from previously selected mesh
-                        if (selectedMesh) {
-                            highlightLayer.removeAllMeshes();
-                        }
-                        
-                        // Set new selected mesh
-                        selectedMesh = pickResult.pickedMesh;
-                        
-                        // Highlight the selected mesh
-                        highlightLayer.addMesh(selectedMesh, BABYLON.Color3.FromHexString("#4d9fff"));
-                        
-                        // Update property panel values
-                        document.getElementById('mass-input').value = selectedMesh.physicsImpostor.getParam("mass");
-                        document.getElementById('mass-slider').value = selectedMesh.physicsImpostor.getParam("mass");
-                        document.getElementById('friction-input').value = selectedMesh.physicsImpostor.getParam("friction");
-                        document.getElementById('friction-slider').value = selectedMesh.physicsImpostor.getParam("friction");
-                        document.getElementById('restitution-input').value = selectedMesh.physicsImpostor.getParam("restitution");
-                        document.getElementById('restitution-slider').value = selectedMesh.physicsImpostor.getParam("restitution");
-                        
-                        // Show property panel
-                        propertiesPanel.classList.add('active');
-                    } else if (pickResult.pickedMesh === ground) {
-                        // If clicking on ground, deselect
-                        if (selectedMesh) {
-                            highlightLayer.removeAllMeshes();
-                            selectedMesh = null;
-                            propertiesPanel.classList.remove('active');
-                        }
-                    }
-                };
-                
-                // Close properties panel
-                document.querySelector('.close-properties').addEventListener('click', function() {
-                    propertiesPanel.classList.remove('active');
-                    if (selectedMesh) {
-                        highlightLayer.removeAllMeshes();
-                        selectedMesh = null;
-                    }
-                });
-                
-                // Property change handlers
-                // Mass property
-                document.getElementById('mass-input').addEventListener('change', function() {
-                    if (selectedMesh) {
-                        const mass = parseFloat(this.value);
-                        selectedMesh.physicsImpostor.setMass(mass);
-                        document.getElementById('mass-slider').value = mass;
-                    }
-                });
-                
-                document.getElementById('mass-slider').addEventListener('input', function() {
-                    if (selectedMesh) {
-                        const mass = parseFloat(this.value);
-                        selectedMesh.physicsImpostor.setMass(mass);
-                        document.getElementById('mass-input').value = mass;
-                    }
-                });
-                
-                // Friction property
-                document.getElementById('friction-input').addEventListener('change', function() {
-                    if (selectedMesh) {
-                        const friction = parseFloat(this.value);
-                        selectedMesh.physicsImpostor.setParam("friction", friction);
-                        document.getElementById('friction-slider').value = friction;
-                    }
-                });
-                
-                document.getElementById('friction-slider').addEventListener('input', function() {
-                    if (selectedMesh) {
-                        const friction = parseFloat(this.value);
-                        selectedMesh.physicsImpostor.setParam("friction", friction);
-                        document.getElementById('friction-input').value = friction;
-                    }
-                });
-                
-                // Restitution property
-                document.getElementById('restitution-input').addEventListener('change', function() {
-                    if (selectedMesh) {
-                        const restitution = parseFloat(this.value);
-                        selectedMesh.physicsImpostor.setParam("restitution", restitution);
-                        document.getElementById('restitution-slider').value = restitution;
-                    }
-                });
-                
-                document.getElementById('restitution-slider').addEventListener('input', function() {
-                    if (selectedMesh) {
-                        const restitution = parseFloat(this.value);
-                        selectedMesh.physicsImpostor.setParam("restitution", restitution);
-                        document.getElementById('restitution-input').value = restitution;
-                    }
-                });
-                
-                // Reset scene button
-                document.getElementById('reset-scene').addEventListener('click', function() {
-                    // Remove all meshes except ground
-                    while (sceneMeshes.length > 0) {
-                        const mesh = sceneMeshes.pop();
-                        mesh.dispose();
-                    }
-                    
-                    // Reset selection
-                    if (selectedMesh) {
-                        highlightLayer.removeAllMeshes();
-                        selectedMesh = null;
-                        propertiesPanel.classList.remove('active');
-                    }
-                });
-                
-                // Toggle gravity button
-                document.getElementById('toggle-gravity').addEventListener('click', function() {
-                    gravityEnabled = !gravityEnabled;
-                    
-                    if (gravityEnabled) {
-                        scene.getPhysicsEngine().setGravity(new BABYLON.Vector3(0, -9.81, 0));
-                        this.innerHTML = '<i class="fas fa-arrow-down"></i> Toggle Gravity';
-                    } else {
-                        scene.getPhysicsEngine().setGravity(new BABYLON.Vector3(0, 0, 0));
-                        this.innerHTML = '<i class="fas fa-arrows-alt"></i> Toggle Gravity';
-                    }
-                });
-                
-                return scene;
-            };
-            
-            // Create the scene
-            const scene = await createScene();
-            
-            // Run the render loop
-            engine.runRenderLoop(function() {
-                scene.render();
+        // Create object function
+        function createObject(shape, geometry) {
+            const body = new CANNON.Body({
+                mass: 1,
+                material: defaultMaterial
             });
-            
-            // Handle browser resize
-            window.addEventListener('resize', function() {
-                engine.resize();
-            });
+            body.addShape(shape);
+            body.position.set(
+                Math.random() * 2 - 1,
+                5,
+                Math.random() * 2 - 1
+            );
+            // Add random rotation
+            body.quaternion.setFromEuler(
+                Math.random() * Math.PI,
+                Math.random() * Math.PI,
+                Math.random() * Math.PI
+            );
+            world.addBody(body);
+
+            const mesh = new THREE.Mesh(geometry, objectMaterial);
+            mesh.castShadow = true;
+            scene.add(mesh);
+
+            objects.push({ body, mesh });
+        }
+
+        // Add Cube button
+        document.getElementById('add-cube').addEventListener('click', function() {
+            const size = 1;
+            const shape = new CANNON.Box(new CANNON.Vec3(size/2, size/2, size/2));
+            const geometry = new THREE.BoxGeometry(size, size, size);
+            createObject(shape, geometry);
         });
-    </script>
+
+        // Add Sphere button
+        document.getElementById('add-sphere').addEventListener('click', function() {
+            const radius = 0.5;
+            const shape = new CANNON.Sphere(radius);
+            const geometry = new THREE.SphereGeometry(radius, 32, 32);
+            createObject(shape, geometry);
+        });
+
+        // Add Cylinder button
+        document.getElementById('add-cylinder').addEventListener('click', function() {
+            const radius = 0.5;
+            const height = 1;
+            const shape = new CANNON.Cylinder(radius, radius, height, 20);
+            const geometry = new THREE.CylinderGeometry(radius, radius, height, 32);
+            createObject(shape, geometry);
+        });
+
+        // Toggle Gravity
+        document.getElementById('toggle-gravity').addEventListener('click', function() {
+            const currentGravity = parseFloat(gravitySlider.value);
+            gravitySlider.value = -currentGravity;
+            updatePhysicsProperties();
+        });
+
+        // Reset button
+        document.getElementById('reset-simulation').addEventListener('click', function() {
+            objects.forEach(obj => {
+                world.remove(obj.body);
+                scene.remove(obj.mesh);
+            });
+            objects.length = 0;
+        });
+
+        // Animation loop
+        const timeStep = 1 / 60;
+        function animate() {
+            requestAnimationFrame(animate);
+
+            world.step(timeStep);
+
+            objects.forEach(obj => {
+                obj.mesh.position.copy(obj.body.position);
+                obj.mesh.quaternion.copy(obj.body.quaternion);
+            });
+
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+            renderer.setSize(width, height);
+        });
+
+        // Prevent scrolling when interacting with the simulation
+        renderer.domElement.addEventListener('mousewheel', function(e) {
+            e.preventDefault();
+        });
+    });
+</script>
 </body>
 </html>

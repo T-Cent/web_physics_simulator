@@ -7,6 +7,13 @@ let time = 0;
 let isWavesRunning = false;
 let wavesAnimationId;
 
+// Default values for reset
+const defaultValues = {
+    frequency1: 5,
+    frequency2: 5,
+    amplitude: 10
+};
+
 // Initialize the waves simulation
 function initWavesSimulation() {
     // Get the canvas
@@ -28,6 +35,11 @@ function initWavesSimulation() {
     const freq2Slider = document.getElementById('waves-frequency2');
     const ampSlider = document.getElementById('waves-amplitude');
     
+    // Value display elements
+    const freq1Value = document.getElementById('freq1-value');
+    const freq2Value = document.getElementById('freq2-value');
+    const amplitudeValue = document.getElementById('amplitude-value');
+    
     if (startButton) {
         startButton.addEventListener('click', toggleWaves);
     }
@@ -36,21 +48,33 @@ function initWavesSimulation() {
         resetButton.addEventListener('click', resetWaves);
     }
     
-    if (freq1Slider) {
+    if (freq1Slider && freq1Value) {
         freq1Slider.addEventListener('input', function() {
             frequency1 = parseFloat(this.value);
+            freq1Value.textContent = frequency1.toFixed(1);
+            if (!isWavesRunning) {
+                drawWaves();
+            }
         });
     }
     
-    if (freq2Slider) {
+    if (freq2Slider && freq2Value) {
         freq2Slider.addEventListener('input', function() {
             frequency2 = parseFloat(this.value);
+            freq2Value.textContent = frequency2.toFixed(1);
+            if (!isWavesRunning) {
+                drawWaves();
+            }
         });
     }
     
-    if (ampSlider) {
+    if (ampSlider && amplitudeValue) {
         ampSlider.addEventListener('input', function() {
             amplitude = parseFloat(this.value);
+            amplitudeValue.textContent = amplitude.toFixed(0);
+            if (!isWavesRunning) {
+                drawWaves();
+            }
         });
     }
     
@@ -59,6 +83,17 @@ function initWavesSimulation() {
     
     // Draw initial state
     drawWaves();
+    
+    // Initialize slider values
+    if (freq1Value) freq1Value.textContent = frequency1.toFixed(1);
+    if (freq2Value) freq2Value.textContent = frequency2.toFixed(1);
+    if (amplitudeValue) amplitudeValue.textContent = amplitude.toFixed(0);
+    
+    // Make waves tab visible if it's hidden
+    const wavesTab = document.getElementById('waves');
+    if (wavesTab && wavesTab.style.display === 'none') {
+        wavesTab.style.display = 'block';
+    }
     
     // Start the waves automatically after a short delay
     setTimeout(() => {
@@ -99,7 +134,7 @@ function calculateCombinedWave(x, t) {
 
 // Draw the waves
 function drawWaves() {
-    if (!wavesContext) return;
+    if (!wavesContext || !wavesCanvas) return;
     
     // Clear canvas
     wavesContext.clearRect(0, 0, wavesCanvas.width, wavesCanvas.height);
@@ -210,7 +245,28 @@ function toggleWaves() {
 
 // Reset waves
 function resetWaves() {
+    // Reset to default values
+    frequency1 = defaultValues.frequency1;
+    frequency2 = defaultValues.frequency2;
+    amplitude = defaultValues.amplitude;
     time = 0;
+    
+    // Update slider positions and value displays
+    const freq1Slider = document.getElementById('waves-frequency1');
+    const freq2Slider = document.getElementById('waves-frequency2');
+    const ampSlider = document.getElementById('waves-amplitude');
+    const freq1Value = document.getElementById('freq1-value');
+    const freq2Value = document.getElementById('freq2-value');
+    const amplitudeValue = document.getElementById('amplitude-value');
+    
+    if (freq1Slider) freq1Slider.value = frequency1;
+    if (freq2Slider) freq2Slider.value = frequency2;
+    if (ampSlider) ampSlider.value = amplitude;
+    
+    if (freq1Value) freq1Value.textContent = frequency1.toFixed(1);
+    if (freq2Value) freq2Value.textContent = frequency2.toFixed(1);
+    if (amplitudeValue) amplitudeValue.textContent = amplitude.toFixed(0);
+    
     drawWaves();
     
     // If running, stop it
@@ -221,7 +277,10 @@ function resetWaves() {
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize simulations when their tab is active
+    // Initialize simulation immediately
+    initWavesSimulation();
+    
+    // Also initialize when tab is selected
     const simNavLinks = document.querySelectorAll('.sim-nav a');
     simNavLinks.forEach(link => {
         link.addEventListener('click', function(e) {
@@ -231,9 +290,4 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-    
-    // Check if waves is the active tab
-    if (window.location.hash === '#waves') {
-        setTimeout(initWavesSimulation, 100);
-    }
 });

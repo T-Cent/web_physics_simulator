@@ -6,6 +6,158 @@
     <title>Simulations - PhysLab</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <style>
+        /* Simulation container styles */
+.simulation-container {
+    display: flex;
+    flex-direction: column;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.simulation-canvas {
+    width: 100%;
+    height: 400px;
+    background-color: #f9f9f9;
+    border-bottom: 1px solid #eaeaea;
+}
+
+/* Controls section */
+.simulation-controls {
+    padding: 16px;
+    background-color: #f5f5f5;
+    border-bottom: 1px solid #eaeaea;
+}
+
+.control-group {
+    margin-bottom: 16px;
+}
+
+.control-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+}
+
+/* Slider styles */
+input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 8px;
+    border-radius: 4px;
+    background: #d3d3d3;
+    outline: none;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+    margin-bottom: 6px;
+}
+
+input[type="range"]:hover {
+    opacity: 1;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #3f51b5;
+    cursor: pointer;
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #3f51b5;
+    cursor: pointer;
+}
+
+.slider-values {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #666;
+}
+
+/* Button styles */
+.button-group {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 16px;
+}
+
+.control-button {
+    padding: 8px 24px;
+    background-color: #3f51b5;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.control-button:hover {
+    background-color: #303f9f;
+}
+
+.control-button.reset {
+    background-color: #f44336;
+}
+
+.control-button.reset:hover {
+    background-color: #d32f2f;
+}
+
+/* Information section */
+.simulation-info {
+    padding: 16px;
+}
+
+.simulation-info h3 {
+    margin-bottom: 12px;
+    color: #333;
+}
+
+.simulation-info p {
+    margin-bottom: 12px;
+    line-height: 1.5;
+    color: #555;
+}
+
+.equations {
+    background-color: #f5f5f5;
+    padding: 12px;
+    border-radius: 4px;
+    margin-bottom: 12px;
+    font-family: 'Courier New', monospace;
+}
+
+/* Responsive adjustments */
+@media (min-width: 768px) {
+    .simulation-container {
+        flex-direction: column;
+    }
+    
+    .simulation-controls {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+    }
+    
+    .button-group {
+        grid-column: 1 / -1;
+    }
+}
+    </style>
 </head>
 <body>
     <header>
@@ -39,16 +191,16 @@
     </section>
 
     <div class="sim-content">
-        <nav class="sim-nav">
+        <!-- <nav class="sim-nav">
             <ul>
-                <li><a href="#pendulum" class="active">Double Pendulum</a></li>
+                <li><a href="#pendulum">Double Pendulum</a></li>
                 <li><a href="#electric">Electric Field</a></li>
                 <li><a href="#quantum">Quantum Wave</a></li>
                 <li><a href="#fluid">Fluid Dynamics</a></li>
                 <li><a href="#waves">Wave Interference</a></li>
                 <li><a href="#collision">Elastic Collisions</a></li>
             </ul>
-        </nav>
+        </nav> -->
 
         <!-- Double Pendulum Simulation -->
         <div id="pendulum" class="simulation-wrapper">
@@ -213,24 +365,24 @@
                 <canvas id="waves-canvas" class="simulation-canvas"></canvas>
                 <div class="simulation-controls">
                     <div class="control-group">
-                        <label for="waves-frequency1">Source 1 Frequency</label>
-                        <input type="range" id="waves-frequency1" min="1" max="10" value="5">
+                        <label for="waves-frequency1">Source 1 Frequency: <span id="freq1-value">5</span></label>
+                        <input type="range" id="waves-frequency1" min="1" max="10" value="5" step="0.1">
                         <div class="slider-values">
                             <span>Low</span>
                             <span>High</span>
                         </div>
                     </div>
                     <div class="control-group">
-                        <label for="waves-frequency2">Source 2 Frequency</label>
-                        <input type="range" id="waves-frequency2" min="1" max="10" value="5">
+                        <label for="waves-frequency2">Source 2 Frequency: <span id="freq2-value">5</span></label>
+                        <input type="range" id="waves-frequency2" min="1" max="10" value="5" step="0.1">
                         <div class="slider-values">
                             <span>Low</span>
                             <span>High</span>
                         </div>
                     </div>
                     <div class="control-group">
-                        <label for="waves-amplitude">Amplitude</label>
-                        <input type="range" id="waves-amplitude" min="1" max="20" value="10">
+                        <label for="waves-amplitude">Amplitude: <span id="amplitude-value">10</span></label>
+                        <input type="range" id="waves-amplitude" min="1" max="20" value="10" step="1">
                         <div class="slider-values">
                             <span>Small</span>
                             <span>Large</span>

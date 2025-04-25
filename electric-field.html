@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulations - PhysLab</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <h1>PhysLab</h1>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="index.html#simulations-preview" class="active">Simulations</a></li>
+                <li><a href="about.html">About Us</a></li>
+                <li class="theme-toggle">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="theme-toggle-btn">
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span class="toggle-text">Dark Mode</span>
+                </li>
+            </ul>
+            <div class="burger">
+                <div class="line1"></div>
+                <div class="line2"></div>
+                <div class="line3"></div>
+            </div>
+        </nav>
+    </header>
+
+    <section class="sim-header">
+        <h1>Interactive Physics Simulations</h1>
+        <p>Experiment with physical phenomena through interactive simulations</p>
+    </section>
+
+    <div class="sim-content">
+        <nav class="sim-nav">
+            <ul>
+                <li><a href="#pendulum">Double Pendulum</a></li>
+                <li><a href="#electric">Electric Field</a></li>
+                <li><a href="#quantum">Quantum Wave</a></li>
+                <li><a href="#fluid">Fluid Dynamics</a></li>
+                <li><a href="#waves">Wave Interference</a></li>
+                <li><a href="#collision">Elastic Collisions</a></li>
+            </ul>
+        </nav>
+
+        <!-- Double Pendulum Simulation -->
+        
+
+        <!-- Electric Field Simulation -->
+        <div id="electric" class="simulation-wrapper">
+            <div class="simulation-container">
+                <canvas id="electric-canvas" class="simulation-canvas"></canvas>
+                <div class="simulation-controls">
+                    <div class="control-group">
+                        <button id="electric-add-positive" class="control-button">Add Positive Charge</button>
+                        <button id="electric-add-negative" class="control-button">Add Negative Charge</button>
+                    </div>
+                    <div class="button-group">
+                        <button id="electric-start" class="control-button">Start</button>
+                        <button id="electric-reset" class="control-button reset">Reset</button>
+                    </div>
+                </div>
+                <div class="simulation-info">
+                    <h3>About Electric Field Visualization</h3>
+                    <p>This simulation demonstrates the electric field created by point charges in space. The field lines show the direction a positive test charge would move if placed in the field.</p>
+                    <div class="equations">
+                        <p>Coulomb's Law: F = k(q₁q₂/r²)</p>
+                        <p>Electric Field: E = F/q = k(q/r²)</p>
+                    </div>
+                    <p>Drag charges to reposition them. Double-click on a charge to remove it. Positive charges (red) create field lines that emanate outward, while negative charges (blue) have field lines pointing inward.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quantum Wave Simulation -->
+        
+
+        <!-- Fluid Dynamics Simulation -->
+        
+
+        <!-- Wave Interference Simulation -->
+        
+
+        <!-- Elastic Collisions Simulation -->
+        
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>PhysLab</h3>
+                <p>Interactive physics simulations for students, educators, and enthusiasts.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="simulations.html">Simulations</a></li>
+                    <li><a href="about.html">About Us</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Connect</h3>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-github"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 PhysLab. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script src="physics-particles.js"></script>
+    <script src="electric-field.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <div id="electric-canvas" class="simulation-canvas"></div>
+</body>
+</html>
