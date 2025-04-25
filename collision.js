@@ -1,8 +1,8 @@
 // Simple Elastic Collisions Simulation
 let collisionCanvas, collisionContext;
 let sphere1, sphere2;
-let mass1 = 5;
-let mass2 = 5;
+let mass1_collision = 5;
+let mass2_collision = 5;
 let initialVelocity = 5;
 let isCollisionRunning = false;
 let collisionAnimationId;
@@ -41,14 +41,14 @@ function initCollisionSimulation() {
     
     if (mass1Slider) {
         mass1Slider.addEventListener('input', function() {
-            mass1 = parseInt(this.value);
+            mass1_collision = parseInt(this.value);
             resetSpheres();
         });
     }
     
     if (mass2Slider) {
         mass2Slider.addEventListener('input', function() {
-            mass2 = parseInt(this.value);
+            mass2_collision = parseInt(this.value);
             resetSpheres();
         });
     }
@@ -92,15 +92,15 @@ function resizeCollisionCanvas() {
 // Create spheres with proper mass and initial velocity
 function resetSpheres() {
     // Calculate radius based on mass (proportional to cube root of mass)
-    const radius1 = 10 * Math.pow(mass1 / 5, 1/3);
-    const radius2 = 10 * Math.pow(mass2 / 5, 1/3);
+    const radius1 = 10 * Math.pow(mass1_collision / 5, 1/3);
+    const radius2 = 10 * Math.pow(mass2_collision / 5, 1/3);
     
     // Create sphere 1 (left)
     sphere1 = {
         x: collisionCanvas ? collisionCanvas.width / 4 : 100,
         y: collisionCanvas ? collisionCanvas.height / 2 : 200,
         radius: radius1,
-        mass: mass1,
+        mass: mass1_collision,
         vx: initialVelocity,
         vy: 0,
         color: '#3a86ff'
@@ -111,7 +111,7 @@ function resetSpheres() {
         x: collisionCanvas ? (3 * collisionCanvas.width) / 4 : 300,
         y: collisionCanvas ? collisionCanvas.height / 2 : 200,
         radius: radius2,
-        mass: mass2,
+        mass: mass2_collision,
         vx: 0,
         vy: 0,
         color: '#ff006e'

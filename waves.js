@@ -3,7 +3,7 @@ let wavesCanvas, wavesContext;
 let frequency1 = 5;
 let frequency2 = 5;
 let amplitude = 10;
-let time = 0;
+let time_waves = 0;
 let isWavesRunning = false;
 let wavesAnimationId;
 
@@ -157,7 +157,7 @@ function drawWaves() {
     wavesContext.beginPath();
     
     for (let x = 0; x < width; x++) {
-        const y = centerY - calculateWave(x, time, frequency1);
+        const y = centerY - calculateWave(x, time_waves, frequency1);
         if (x === 0) {
             wavesContext.moveTo(x, y);
         } else {
@@ -173,7 +173,7 @@ function drawWaves() {
     wavesContext.beginPath();
     
     for (let x = 0; x < width; x++) {
-        const y = centerY - calculateWave(x, time, frequency2, Math.PI / 4);
+        const y = centerY - calculateWave(x, time_waves, frequency2, Math.PI / 4);
         if (x === 0) {
             wavesContext.moveTo(x, y);
         } else {
@@ -189,7 +189,7 @@ function drawWaves() {
     wavesContext.beginPath();
     
     for (let x = 0; x < width; x++) {
-        const y = centerY - calculateCombinedWave(x, time);
+        const y = centerY - calculateCombinedWave(x, time_waves);
         if (x === 0) {
             wavesContext.moveTo(x, y);
         } else {
@@ -221,7 +221,7 @@ function drawWaves() {
 function animateWaves() {
     if (!isWavesRunning) return;
     
-    time += 0.02;
+    time_waves += 0.02;
     drawWaves();
     
     wavesAnimationId = requestAnimationFrame(animateWaves);
@@ -249,7 +249,7 @@ function resetWaves() {
     frequency1 = defaultValues.frequency1;
     frequency2 = defaultValues.frequency2;
     amplitude = defaultValues.amplitude;
-    time = 0;
+    time_waves = 0;
     
     // Update slider positions and value displays
     const freq1Slider = document.getElementById('waves-frequency1');
